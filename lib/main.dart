@@ -35,24 +35,26 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 5,
-      child: Scaffold(
-        bottomNavigationBar: TabBar(
-          tabs: [
-            Tab(icon: Icon(Icons.home)),
-            Tab(icon: Icon(Icons.search)),
-            Tab(icon: Icon(Icons.create)),
-            Tab(icon: Icon(Icons.notifications)),
-            Tab(icon: Icon(Icons.account_circle)),
-          ],
-        ),
-        body: const TabBarView(
-          children: [
-            Feed(),
-            Search(),
-            CreatePost(),
-            Icon(Icons.notifications),
-            Icon(Icons.account_circle),
-          ],
+      child: SafeArea(
+        child: Scaffold(
+          bottomNavigationBar: TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.home)),
+              Tab(icon: Icon(Icons.search)),
+              Tab(icon: Icon(Icons.create)),
+              Tab(icon: Icon(Icons.notifications)),
+              Tab(icon: Icon(Icons.account_circle)),
+            ],
+          ),
+          body: const TabBarView(
+            children: [
+              Feed(),
+              Search(),
+              CreateTab(),
+              Icon(Icons.notifications),
+              Icon(Icons.account_circle),
+            ],
+          ),
         ),
       ),
     );
@@ -138,6 +140,17 @@ class Search extends StatelessWidget {
   }
 }
 
+class CreateTab extends StatelessWidget {
+  const CreateTab({super.key});
+
+  @override
+  Widget build(BuildContext build) {
+    return Navigator(
+      onGenerateRoute: (_) => MaterialPageRoute(builder: (_) => CreatePost()),
+    );
+  }
+}
+
 class CreatePost extends StatelessWidget {
   const CreatePost({super.key});
 
@@ -162,7 +175,16 @@ class CreatePost extends StatelessWidget {
                 label: Text("Select an intention"),
               ),
               SizedBox(width: 4),
-              IconButton(icon: Icon(Icons.add), onPressed: () => {}),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () => {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const CreateIntention(),
+                    ),
+                  ),
+                },
+              ),
             ],
           ),
           GestureDetector(
@@ -204,6 +226,44 @@ class CreatePost extends StatelessWidget {
               SizedBox(width: 8),
               Expanded(
                 child: FilledButton(child: Text("Post"), onPressed: () => {}),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CreateIntention extends StatelessWidget {
+  const CreateIntention({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 8,
+        children: [
+          TextField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hint: Text("e.g. touch grass"),
+            ),
+          ),
+          Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => {Navigator.of(context).pop()},
+                  style: FilledButton.styleFrom(backgroundColor: Colors.grey),
+                  child: Text("Cancel"),
+                ),
+              ),
+              Expanded(
+                child: FilledButton(onPressed: () => {}, child: Text("Create")),
               ),
             ],
           ),
