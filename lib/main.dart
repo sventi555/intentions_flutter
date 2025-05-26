@@ -190,7 +190,23 @@ class CreatePost extends StatelessWidget {
               alignLabelWithHint: true,
             ),
           ),
-          FilledButton(child: Text("Post"), onPressed: () => {}),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                  child: Text("Discard"),
+                  onPressed: () => {},
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: FilledButton(child: Text("Post"), onPressed: () => {}),
+              ),
+            ],
+          ),
         ],
       ),
     );
