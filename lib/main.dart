@@ -14,8 +14,17 @@ class App extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
       ),
-      home: const Home(),
+      home: const Preview(),
     );
+  }
+}
+
+class Preview extends StatelessWidget {
+  const Preview({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Home();
   }
 }
 
@@ -24,13 +33,26 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        alignment: Alignment.center,
-        color: Theme.of(context).colorScheme.primary,
-        child: Text(
-          "Hello Intentions",
-          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+    return DefaultTabController(
+      length: 5,
+      child: Scaffold(
+        bottomNavigationBar: const TabBar(
+          tabs: [
+            Tab(icon: Icon(Icons.home)),
+            Tab(icon: Icon(Icons.search)),
+            Tab(icon: Icon(Icons.create)),
+            Tab(icon: Icon(Icons.notifications)),
+            Tab(icon: Icon(Icons.account_circle)),
+          ],
+        ),
+        body: const TabBarView(
+          children: [
+            Icon(Icons.home),
+            Icon(Icons.search),
+            Icon(Icons.create),
+            Icon(Icons.notifications),
+            Icon(Icons.account_circle),
+          ],
         ),
       ),
     );
