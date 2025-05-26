@@ -36,7 +36,7 @@ class Home extends StatelessWidget {
     return DefaultTabController(
       length: 5,
       child: Scaffold(
-        bottomNavigationBar: const TabBar(
+        bottomNavigationBar: TabBar(
           tabs: [
             Tab(icon: Icon(Icons.home)),
             Tab(icon: Icon(Icons.search)),
@@ -47,7 +47,7 @@ class Home extends StatelessWidget {
         ),
         body: const TabBarView(
           children: [
-            Icon(Icons.home),
+            Feed(),
             Icon(Icons.search),
             Icon(Icons.create),
             Icon(Icons.notifications),
@@ -55,6 +55,21 @@ class Home extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class Feed extends StatelessWidget {
+  const Feed({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      itemCount: 5,
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
+      itemBuilder: (BuildContext context, int index) {
+        return Placeholder();
+      },
     );
   }
 }
