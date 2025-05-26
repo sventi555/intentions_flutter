@@ -52,7 +52,7 @@ class Home extends StatelessWidget {
               Search(),
               CreateTab(),
               Notifications(),
-              Icon(Icons.account_circle),
+              Profile(),
             ],
           ),
         ),
@@ -78,7 +78,7 @@ class Post extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
+        Container(
           padding: EdgeInsets.all(8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +105,7 @@ class Post extends StatelessWidget {
           image: NetworkImage("https://placehold.co/400/png"),
           fit: BoxFit.fill,
         ),
-        Padding(padding: EdgeInsets.all(8), child: Text("description")),
+        Container(padding: EdgeInsets.all(8), child: Text("description")),
       ],
     );
   }
@@ -116,7 +116,7 @@ class Search extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: EdgeInsets.all(8),
       child: Column(
         children: [
@@ -156,7 +156,7 @@ class CreatePost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -297,8 +297,55 @@ class Notifications extends StatelessWidget {
   }
 }
 
+class Profile extends StatelessWidget {
+  const Profile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.all(8),
+          child: Row(
+            spacing: 8,
+            children: [
+              ProfilePic(size: 128),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 8,
+                  children: [
+                    Text("username", style: TextStyle(fontSize: 16)),
+                    FilledButton(onPressed: () => {}, child: Text("follow")),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        DefaultTabController(
+          length: 2,
+          child: Expanded(
+            child: Scaffold(
+              appBar: TabBar(
+                tabs: [
+                  Tab(text: "posts"),
+                  Tab(text: "intentions"),
+                ],
+              ),
+              body: const TabBarView(children: [Text("booga"), Text("bunger")]),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class ProfilePic extends StatelessWidget {
-  const ProfilePic({super.key});
+  const ProfilePic({super.key, this.size = 32});
+
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -306,11 +353,11 @@ class ProfilePic extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         image: DecorationImage(
-          image: NetworkImage("https://placehold.co/48/png"),
+          image: NetworkImage("https://placehold.co/${size.toInt()}/png"),
         ),
       ),
-      width: 32,
-      height: 32,
+      width: size,
+      height: size,
     );
   }
 }
