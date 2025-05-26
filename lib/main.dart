@@ -48,7 +48,7 @@ class Home extends StatelessWidget {
         body: const TabBarView(
           children: [
             Feed(),
-            Icon(Icons.search),
+            Search(),
             Icon(Icons.create),
             Icon(Icons.notifications),
             Icon(Icons.account_circle),
@@ -64,13 +64,7 @@ class Feed extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      itemCount: 5,
-      separatorBuilder: (BuildContext context, int index) => const Divider(),
-      itemBuilder: (BuildContext context, int index) {
-        return Post();
-      },
-    );
+    return ListView(children: [for (var _ in Iterable.generate(10)) Post()]);
   }
 }
 
@@ -92,16 +86,7 @@ class Post extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: NetworkImage("https://placehold.co/48/png"),
-                          ),
-                        ),
-                        width: 32,
-                        height: 32,
-                      ),
+                      ProfilePic(),
                       SizedBox(width: 8),
                       Text("username"),
                     ],
@@ -120,6 +105,53 @@ class Post extends StatelessWidget {
         ),
         Padding(padding: EdgeInsets.all(8), child: Text("description")),
       ],
+    );
+  }
+}
+
+class Search extends StatelessWidget {
+  const Search({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: Column(
+        children: [
+          TextField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: "Search username",
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              children: [
+                for (var _ in Iterable.generate(10))
+                  ListTile(leading: ProfilePic(), title: Text("username")),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ProfilePic extends StatelessWidget {
+  const ProfilePic({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+          image: NetworkImage("https://placehold.co/48/png"),
+        ),
+      ),
+      width: 32,
+      height: 32,
     );
   }
 }
