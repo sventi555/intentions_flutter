@@ -23,16 +23,15 @@ class CreateIntention extends StatelessWidget {
               children: [
                 Expanded(
                   child: FilledButton(
-                    onPressed: () => {Navigator.of(context).pop()},
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
                     style: FilledButton.styleFrom(backgroundColor: Colors.grey),
                     child: Text("Cancel"),
                   ),
                 ),
                 Expanded(
-                  child: FilledButton(
-                    onPressed: () => {},
-                    child: Text("Create"),
-                  ),
+                  child: FilledButton(onPressed: () {}, child: Text("Create")),
                 ),
               ],
             ),

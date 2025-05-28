@@ -38,18 +38,16 @@ class CreatePost extends StatelessWidget {
               SizedBox(width: 4),
               IconButton(
                 icon: Icon(Icons.add),
-                onPressed: () => {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const CreateIntention(),
-                    ),
-                  ),
+                onPressed: () {
+                  Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => CreateIntention()));
                 },
               ),
             ],
           ),
           GestureDetector(
-            onTap: () => {},
+            onTap: () {},
             child: Container(
               padding: EdgeInsets.all(32),
               decoration: BoxDecoration(
@@ -81,12 +79,12 @@ class CreatePost extends StatelessWidget {
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                   ),
                   child: Text("Discard"),
-                  onPressed: () => {},
+                  onPressed: () {},
                 ),
               ),
               SizedBox(width: 8),
               Expanded(
-                child: FilledButton(child: Text("Post"), onPressed: () => {}),
+                child: FilledButton(child: Text("Post"), onPressed: () {}),
               ),
             ],
           ),

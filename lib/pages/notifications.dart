@@ -15,8 +15,8 @@ class Notifications extends StatelessWidget {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(icon: Icon(Icons.check), onPressed: () => {}),
-                IconButton(icon: Icon(Icons.close), onPressed: () => {}),
+                IconButton(icon: Icon(Icons.check), onPressed: () {}),
+                IconButton(icon: Icon(Icons.close), onPressed: () {}),
               ],
             ),
           ),

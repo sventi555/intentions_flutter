@@ -33,7 +33,7 @@ class Profile extends StatelessWidget {
                   spacing: 8,
                   children: [
                     Text("username", style: TextStyle(fontSize: 16)),
-                    FilledButton(onPressed: () => {}, child: Text("follow")),
+                    FilledButton(onPressed: () {}, child: Text("follow")),
                   ],
                 ),
               ),
@@ -90,10 +90,7 @@ class ProfileIntentions extends StatelessWidget {
                   DropdownMenuEntry(value: "count", label: "Total posts"),
                 ],
               ),
-              IconButton(
-                icon: Icon(Icons.keyboard_arrow_up),
-                onPressed: () => {},
-              ),
+              IconButton(icon: Icon(Icons.keyboard_arrow_up), onPressed: () {}),
             ],
           ),
           Expanded(
@@ -103,10 +100,10 @@ class ProfileIntentions extends StatelessWidget {
                   ListTile(
                     title: Text("intention $i"),
                     subtitle: Text("active 1 day ago"),
-                    onTap: () => {
+                    onTap: () {
                       Navigator.of(
                         context,
-                      ).push(MaterialPageRoute(builder: (_) => Intention())),
+                      ).push(MaterialPageRoute(builder: (_) => Intention()));
                     },
                   ),
               ],
