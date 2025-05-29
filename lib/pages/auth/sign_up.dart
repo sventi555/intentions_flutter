@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 
 class SignUp extends StatefulWidget {
-  const SignUp({super.key, required this.redirectTo});
-
-  final Route redirectTo;
+  const SignUp({super.key});
 
   @override
   State<SignUp> createState() {
@@ -101,7 +100,7 @@ class _SignUpState extends State<SignUp> {
               onPressed: () {
                 onSubmit(
                   onSuccess: () {
-                    Navigator.of(context).pushReplacement(widget.redirectTo);
+                    context.go('/');
                   },
                 );
               },
@@ -113,11 +112,7 @@ class _SignUpState extends State<SignUp> {
                 TextButton(
                   child: Text("Sign in"),
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => SignIn(redirectTo: widget.redirectTo),
-                      ),
-                    );
+                    context.go('/signin');
                   },
                 ),
               ],

@@ -60,7 +60,11 @@ class Home extends StatelessWidget {
           ),
           body: TabBarView(
             children: [
-              FeedTab(),
+              Consumer<AuthUserNotifier>(
+                builder: (_, userNotifier, _) {
+                  return userNotifier.isLoading ? Placeholder() : FeedTab();
+                },
+              ),
               Search(),
               CreateTab(),
               Notifications(),

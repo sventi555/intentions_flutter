@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateIntention extends StatelessWidget {
   const CreateIntention({super.key});
@@ -24,7 +25,7 @@ class CreateIntention extends StatelessWidget {
                 Expanded(
                   child: FilledButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      context.go('/');
                     },
                     style: FilledButton.styleFrom(backgroundColor: Colors.grey),
                     child: Text("Cancel"),

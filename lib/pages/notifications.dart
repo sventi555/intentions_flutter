@@ -6,21 +6,23 @@ class Notifications extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        for (var _ in Iterable.generate(5))
-          ListTile(
-            title: Text("user requested to follow you"),
-            leading: ProfilePic(),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(icon: Icon(Icons.check), onPressed: () {}),
-                IconButton(icon: Icon(Icons.close), onPressed: () {}),
-              ],
+    return Scaffold(
+      body: ListView(
+        children: [
+          for (var _ in Iterable.generate(5))
+            ListTile(
+              title: Text("user requested to follow you"),
+              leading: ProfilePic(),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(icon: Icon(Icons.check), onPressed: () {}),
+                  IconButton(icon: Icon(Icons.close), onPressed: () {}),
+                ],
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

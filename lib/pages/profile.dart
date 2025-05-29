@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/pages/intention.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
+
+final _router = GoRouter(
+  routes: [
+    GoRoute(path: '/', builder: (context, state) => Profile()),
+    GoRoute(path: '/intention', builder: (context, state) => Intention()),
+  ],
+);
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
 
   @override
   Widget build(BuildContext build) {
-    return Navigator(
-      onGenerateRoute: (_) => MaterialPageRoute(builder: (_) => Profile()),
-    );
+    return MaterialApp.router(routerConfig: _router);
   }
 }
 
@@ -19,44 +25,46 @@ class Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.all(8),
-          child: Row(
-            spacing: 8,
-            children: [
-              ProfilePic(size: 128),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: 8,
-                  children: [
-                    Text("username", style: TextStyle(fontSize: 16)),
-                    FilledButton(onPressed: () {}, child: Text("follow")),
+    return Scaffold(
+      body: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              spacing: 8,
+              children: [
+                ProfilePic(size: 128),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: 8,
+                    children: [
+                      Text("username", style: TextStyle(fontSize: 16)),
+                      FilledButton(onPressed: () {}, child: Text("follow")),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          DefaultTabController(
+            length: 2,
+            child: Expanded(
+              child: Scaffold(
+                appBar: TabBar(
+                  tabs: [
+                    Tab(text: "Posts"),
+                    Tab(text: "Intentions"),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-        DefaultTabController(
-          length: 2,
-          child: Expanded(
-            child: Scaffold(
-              appBar: TabBar(
-                tabs: [
-                  Tab(text: "Posts"),
-                  Tab(text: "Intentions"),
-                ],
-              ),
-              body: const TabBarView(
-                children: [ProfilePosts(), ProfileIntentions()],
+                body: const TabBarView(
+                  children: [ProfilePosts(), ProfileIntentions()],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -101,9 +109,7 @@ class ProfileIntentions extends StatelessWidget {
                     title: Text("intention $i"),
                     subtitle: Text("active 1 day ago"),
                     onTap: () {
-                      Navigator.of(
-                        context,
-                      ).push(MaterialPageRoute(builder: (_) => Intention()));
+                      context.go('/intention');
                     },
                   ),
               ],

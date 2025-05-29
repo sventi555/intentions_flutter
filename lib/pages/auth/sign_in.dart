@@ -1,11 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intentions_flutter/pages/auth/sign_up.dart';
+import 'package:go_router/go_router.dart';
 
 class SignIn extends StatefulWidget {
-  const SignIn({super.key, required this.redirectTo});
-
-  final Route redirectTo;
+  const SignIn({super.key});
 
   @override
   State<SignIn> createState() {
@@ -75,7 +73,7 @@ class _SignInState extends State<SignIn> {
               onPressed: () {
                 onSubmit(
                   onSuccess: () {
-                    Navigator.of(context).pushReplacement(widget.redirectTo);
+                    context.go('/');
                   },
                 );
               },
@@ -87,11 +85,7 @@ class _SignInState extends State<SignIn> {
                 TextButton(
                   child: Text("Sign up"),
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => SignUp(redirectTo: widget.redirectTo),
-                      ),
-                    );
+                    context.go('/signup');
                   },
                 ),
               ],

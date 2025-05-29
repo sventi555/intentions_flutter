@@ -6,25 +6,27 @@ class Search extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(8),
-      child: Column(
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: "Search username",
+    return Scaffold(
+      body: Container(
+        padding: EdgeInsets.all(8),
+        child: Column(
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: "Search username",
+              ),
             ),
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                for (var _ in Iterable.generate(10))
-                  ListTile(leading: ProfilePic(), title: Text("username")),
-              ],
+            Expanded(
+              child: ListView(
+                children: [
+                  for (var _ in Iterable.generate(10))
+                    ListTile(leading: ProfilePic(), title: Text("username")),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
