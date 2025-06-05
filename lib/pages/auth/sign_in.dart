@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intentions_flutter/firebase.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -24,7 +25,7 @@ class _SignInState extends State<SignIn> {
 
   void onSubmit({required Function() onSuccess}) async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await firebase.auth.signInWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:intentions_flutter/pages/auth/sign_in.dart';
+import 'package:intentions_flutter/firebase.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -40,7 +40,7 @@ class _SignUpState extends State<SignUp> {
         return;
       }
 
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await firebase.auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );

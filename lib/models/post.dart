@@ -20,6 +20,7 @@ class PostIntention {
 }
 
 class Post {
+  final String id;
   final String userId;
   final PostUser user;
   final String intentionId;
@@ -29,6 +30,7 @@ class Post {
   final String? image;
 
   const Post({
+    required this.id,
     required this.userId,
     required this.user,
     required this.intentionId,
@@ -38,8 +40,9 @@ class Post {
     this.image,
   });
 
-  factory Post.fromJson(Map<String, dynamic> json) {
+  factory Post.fromJson(String id, Map<String, dynamic> json) {
     return Post(
+      id: id,
       userId: json['userId'],
       user: PostUser.fromJson(json['user']),
       intentionId: json['intentionId'],

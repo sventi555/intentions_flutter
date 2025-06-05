@@ -1,19 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intentions_flutter/notifiers/auth_user.dart';
+import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/widgets/post.dart';
-import 'package:provider/provider.dart';
 
-final _router = GoRouter(
+GoRouter _getRouter(User? user) => GoRouter(
   routes: [
     GoRoute(
       path: '/',
       builder: (context, state) => Feed(),
       redirect: (context, state) {
-        if (context.read<AuthUserNotifier>().user == null) {
+        if (user == null) {
           return '/signin';
         } else {
           return null;
@@ -25,12 +25,13 @@ final _router = GoRouter(
   ],
 );
 
-class FeedTab extends StatelessWidget {
+class FeedTab extends ConsumerWidget {
   const FeedTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(routerConfig: _router);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authUserProvider).value;
+    return MaterialApp.router(routerConfig: _getRouter(user));
   }
 }
 

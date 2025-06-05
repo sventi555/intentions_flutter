@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/pages/create/intention.dart';
+import 'package:intentions_flutter/providers/auth_user.dart';
+import 'package:intentions_flutter/providers/intentions.dart';
+import 'package:intentions_flutter/providers/posts.dart';
 
 final _router = GoRouter(
   routes: [
@@ -18,11 +22,22 @@ class CreateTab extends StatelessWidget {
   }
 }
 
-class CreatePost extends StatelessWidget {
+class CreatePost extends ConsumerStatefulWidget {
   const CreatePost({super.key});
 
   @override
+  CreatePostState createState() => CreatePostState();
+}
+
+class CreatePostState extends ConsumerState<CreatePost> {
+  TextEditingController descriptionController = TextEditingController();
+  String? selectedIntentionId;
+
+  @override
   Widget build(BuildContext context) {
+    final userId = ref.watch(authUserProvider).value?.uid;
+    final intentions = ref.watch(intentionsProvider(userId ?? ''));
+
     return Scaffold(
       body: Container(
         padding: EdgeInsets.all(8),
@@ -33,13 +48,22 @@ class CreatePost extends StatelessWidget {
             Row(
               children: [
                 DropdownMenu<String>(
-                  dropdownMenuEntries: [
-                    for (var i in Iterable.generate(5))
-                      DropdownMenuEntry<String>(
-                        label: "intention $i",
-                        value: "intention $i",
-                      ),
-                  ],
+                  onSelected: (val) {
+                    print(val);
+                    setState(() {
+                      selectedIntentionId = val;
+                    });
+                  },
+                  dropdownMenuEntries: switch (intentions) {
+                    AsyncData(:final value) => [
+                      for (var intention in value)
+                        DropdownMenuEntry<String>(
+                          label: intention.name,
+                          value: intention.id,
+                        ),
+                    ],
+                    _ => [],
+                  },
                   label: Text("Select an intention"),
                 ),
                 SizedBox(width: 4),
@@ -68,6 +92,7 @@ class CreatePost extends StatelessWidget {
               ),
             ),
             TextField(
+              controller: descriptionController,
               maxLines: null,
               minLines: 3,
               decoration: InputDecoration(
@@ -89,7 +114,24 @@ class CreatePost extends StatelessWidget {
                 ),
                 SizedBox(width: 8),
                 Expanded(
-                  child: FilledButton(child: Text("Post"), onPressed: () {}),
+                  child: FilledButton(
+                    child: Text("Post"),
+                    onPressed: () {
+                      final createPost = ref.read(createPostProvider);
+                      createPost(
+                            CreatePostBody(
+                              intentionId: selectedIntentionId ?? '',
+                              description: descriptionController.text,
+                            ),
+                          )
+                          .then((_) {
+                            print('created post');
+                          })
+                          .catchError((e) {
+                            print(e);
+                          });
+                    },
+                  ),
                 ),
               ],
             ),

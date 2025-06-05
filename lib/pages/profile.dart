@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/pages/intention.dart';
+import 'package:intentions_flutter/providers/auth_user.dart';
+import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 
@@ -69,12 +72,21 @@ class Profile extends StatelessWidget {
   }
 }
 
-class ProfilePosts extends StatelessWidget {
+class ProfilePosts extends ConsumerWidget {
   const ProfilePosts({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ListView(children: [for (var _ in Iterable.generate(5)) Post()]);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userId = ref.watch(authUserProvider).value?.uid;
+    final posts = ref.watch(postsProvider(userId ?? ''));
+
+    return switch (posts) {
+      AsyncData(:final value) => ListView(
+        children: [for (var post in value) Post()],
+      ),
+      AsyncError() => Text('Oops'),
+      _ => CircularProgressIndicator(),
+    };
   }
 }
 

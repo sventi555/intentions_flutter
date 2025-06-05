@@ -1,23 +1,15 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intentions_flutter/firebase_options.dart';
-import 'package:intentions_flutter/notifiers/auth_user.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intentions_flutter/firebase.dart';
+import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/pages/create/post.dart';
 import 'package:intentions_flutter/pages/feed.dart';
 import 'package:intentions_flutter/pages/notifications.dart';
 import 'package:intentions_flutter/pages/profile.dart';
 import 'package:intentions_flutter/pages/search.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  if (kDebugMode) {
-    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
-  }
+  await firebase.init();
 
   runApp(App());
 }
@@ -27,8 +19,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthUserNotifier(),
+    return ProviderScope(
       child: MaterialApp(
         title: 'Intentions',
         theme: ThemeData(
@@ -60,9 +51,11 @@ class Home extends StatelessWidget {
           ),
           body: TabBarView(
             children: [
-              Consumer<AuthUserNotifier>(
-                builder: (_, userNotifier, _) {
-                  return userNotifier.isLoading ? Placeholder() : FeedTab();
+              Consumer(
+                builder: (_, ref, _) {
+                  return ref.watch(authUserProvider).isLoading
+                      ? Placeholder()
+                      : FeedTab();
                 },
               ),
               Search(),
