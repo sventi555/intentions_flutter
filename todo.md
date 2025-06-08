@@ -1,0 +1,2 @@
+- set up correct images for dp and posts
+- provider invalidation for posts and intentions

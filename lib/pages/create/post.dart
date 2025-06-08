@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intentions_flutter/pages/create/intention.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/posts.dart';
+import 'package:intentions_flutter/utils/image.dart';
 
 final _router = GoRouter(
   routes: [
@@ -26,16 +28,17 @@ class CreatePost extends ConsumerStatefulWidget {
   const CreatePost({super.key});
 
   @override
-  CreatePostState createState() => CreatePostState();
+  ConsumerState<CreatePost> createState() => _CreatePostState();
 }
 
-class CreatePostState extends ConsumerState<CreatePost> {
+class _CreatePostState extends ConsumerState<CreatePost> {
   TextEditingController descriptionController = TextEditingController();
   String? selectedIntentionId;
+  XFile? image;
 
   @override
   Widget build(BuildContext context) {
-    final userId = ref.watch(authUserProvider).value?.uid;
+    final userId = ref.watch(authUserProvider).user?.uid;
     final intentions = ref.watch(intentionsProvider(userId ?? ''));
 
     return Scaffold(
@@ -49,7 +52,6 @@ class CreatePostState extends ConsumerState<CreatePost> {
               children: [
                 DropdownMenu<String>(
                   onSelected: (val) {
-                    print(val);
                     setState(() {
                       selectedIntentionId = val;
                     });
@@ -76,7 +78,14 @@ class CreatePostState extends ConsumerState<CreatePost> {
               ],
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () async {
+                final ImagePicker picker = ImagePicker();
+                picker.pickImage(source: ImageSource.gallery).then((img) {
+                  setState(() {
+                    image = img;
+                  });
+                });
+              },
               child: Container(
                 padding: EdgeInsets.all(32),
                 decoration: BoxDecoration(
@@ -116,11 +125,15 @@ class CreatePostState extends ConsumerState<CreatePost> {
                 Expanded(
                   child: FilledButton(
                     child: Text("Post"),
-                    onPressed: () {
+                    onPressed: () async {
                       final createPost = ref.read(createPostProvider);
+                      final img = image;
                       createPost(
                             CreatePostBody(
                               intentionId: selectedIntentionId ?? '',
+                              image: img != null
+                                  ? await toImageDataUrl(img)
+                                  : null,
                               description: descriptionController.text,
                             ),
                           )

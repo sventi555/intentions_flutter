@@ -2,9 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
+import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 
 GoRouter _getRouter(User? user) => GoRouter(
@@ -15,13 +17,30 @@ GoRouter _getRouter(User? user) => GoRouter(
       redirect: (context, state) {
         if (user == null) {
           return '/signin';
-        } else {
-          return null;
         }
+        return null;
       },
     ),
-    GoRoute(path: '/signin', builder: (context, state) => SignIn()),
-    GoRoute(path: '/signup', builder: (context, state) => SignUp()),
+    GoRoute(
+      path: '/signin',
+      redirect: (context, state) {
+        if (user != null) {
+          return '/';
+        }
+        return null;
+      },
+      builder: (context, state) => SignIn(),
+    ),
+    GoRoute(
+      path: '/signup',
+      redirect: (context, state) {
+        if (user != null) {
+          return '/';
+        }
+        return null;
+      },
+      builder: (context, state) => SignUp(),
+    ),
   ],
 );
 
@@ -30,38 +49,52 @@ class FeedTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authUserProvider).value;
-    return MaterialApp.router(routerConfig: _getRouter(user));
+    final userState = ref.watch(authUserProvider);
+
+    if (userState.loading) {
+      return CircularProgressIndicator();
+    }
+
+    return MaterialApp.router(routerConfig: _getRouter(userState.user));
   }
 }
 
-class Feed extends StatelessWidget {
+class Feed extends ConsumerWidget {
   const Feed({super.key});
 
-  signOut({required Function() onSuccess}) async {
-    await FirebaseAuth.instance.signOut();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final posts = ref.watch(feedProvider);
 
-    onSuccess();
+    return Scaffold(
+      body: Column(
+        children: [
+          SignOutButton(),
+          switch (posts) {
+            AsyncData(:final value) => Expanded(
+              child: ListView(
+                children: value.map((post) => Post(post: post)).toList(),
+              ),
+            ),
+            AsyncError() => Text('error fetching feed'),
+            _ => CircularProgressIndicator(),
+          },
+        ],
+      ),
+    );
   }
+}
+
+class SignOutButton extends StatelessWidget {
+  const SignOutButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView(
-        children: [
-          TextButton(
-            child: Text("Sign out"),
-            onPressed: () {
-              signOut(
-                onSuccess: () {
-                  context.go('/signin');
-                },
-              );
-            },
-          ),
-          for (var _ in Iterable.generate(10)) Post(),
-        ],
-      ),
+    return TextButton(
+      child: Text("Sign out"),
+      onPressed: () {
+        firebase.auth.signOut();
+      },
     );
   }
 }

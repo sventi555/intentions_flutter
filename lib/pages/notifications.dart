@@ -12,7 +12,7 @@ class Notifications extends StatelessWidget {
           for (var _ in Iterable.generate(5))
             ListTile(
               title: Text("user requested to follow you"),
-              leading: ProfilePic(),
+              leading: ProfilePic(image: "TODO"),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

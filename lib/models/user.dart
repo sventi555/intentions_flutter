@@ -1,18 +1,21 @@
 class User {
+  final String id;
   final String email;
   final String username;
-  final String isPrivate;
+  final bool isPrivate;
   final String? image;
 
   const User({
+    required this.id,
     required this.email,
     required this.username,
     required this.isPrivate,
     this.image,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(String id, Map<String, dynamic> json) {
     return User(
+      id: id,
       email: json['email'],
       username: json['username'],
       isPrivate: json['private'],

@@ -1,0 +1,29 @@
+import 'dart:convert';
+
+import 'package:image_picker/image_picker.dart';
+
+Future<String?> toImageDataUrl(XFile image) async {
+  final imageBytes = await image.readAsBytes();
+
+  final base64Image = base64Encode(imageBytes);
+
+  var mimeType = image.mimeType;
+  if (mimeType == null) {
+    try {
+      final ext = image.name.toLowerCase().split('.').last;
+      if (ext == 'jpg' || ext == 'jpeg') {
+        mimeType = 'image/jpeg';
+      } else if (ext == 'png' || ext == 'webp') {
+        mimeType = 'image/$ext';
+      } else {
+        print('mime type not allowed');
+        return null;
+      }
+    } catch (e) {
+      print('could not determine image type');
+      return null;
+    }
+  }
+
+  return 'data:$mimeType;base64,$base64Image';
+}

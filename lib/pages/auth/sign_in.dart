@@ -23,13 +23,12 @@ class _SignInState extends State<SignIn> {
     super.dispose();
   }
 
-  void onSubmit({required Function() onSuccess}) async {
+  void onSubmit() async {
     try {
-      await firebase.auth.signInWithEmailAndPassword(
+      firebase.auth.signInWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
-      onSuccess();
     } on FirebaseAuthException catch (e) {
       print(e.code);
     }
@@ -70,16 +69,7 @@ class _SignInState extends State<SignIn> {
                 ),
               ],
             ),
-            FilledButton(
-              onPressed: () {
-                onSubmit(
-                  onSuccess: () {
-                    context.go('/');
-                  },
-                );
-              },
-              child: Text("Sign in"),
-            ),
+            FilledButton(onPressed: onSubmit, child: Text("Sign in")),
             Column(
               children: [
                 Text("New user?"),

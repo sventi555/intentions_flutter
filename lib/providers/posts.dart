@@ -20,11 +20,15 @@ final postsProvider = FutureProvider.family<List<Post>, String>((
   return posts.docs.map((d) => Post.fromJson(d.id, d.data())).toList();
 });
 
-final feedProvider = FutureProvider((ref) async {
-  final user = await ref.watch(authUserProvider.future);
+final feedProvider = FutureProvider<List<Post>>((ref) async {
+  final user = ref.watch(authUserProvider).user;
+
+  if (user == null) {
+    return [];
+  }
 
   final feed = await firebase.db
-      .collection('users/${user?.uid}/feed')
+      .collection('users/${user.uid}/feed')
       .orderBy('createdAt', descending: true)
       .get();
 
@@ -34,13 +38,17 @@ final feedProvider = FutureProvider((ref) async {
 class CreatePostBody {
   final String intentionId;
   final String? description;
-  // String/buffer image;
+  final String? image;
 
-  const CreatePostBody({required this.intentionId, this.description});
+  const CreatePostBody({
+    required this.intentionId,
+    this.description,
+    this.image,
+  });
 }
 
 Future<void> createPost(Ref ref, CreatePostBody body) async {
-  final user = await ref.read(authUserProvider.future);
+  final user = ref.read(authUserProvider).user;
   final token = await user?.getIdToken();
 
   await http.post(
@@ -48,6 +56,7 @@ Future<void> createPost(Ref ref, CreatePostBody body) async {
     headers: {'Authorization': token ?? '', 'Content-Type': 'application/json'},
     body: jsonEncode({
       'intentionId': body.intentionId,
+      'image': body.image,
       'description': body.description,
     }),
   );

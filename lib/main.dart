@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intentions_flutter/firebase.dart';
-import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/pages/create/post.dart';
 import 'package:intentions_flutter/pages/feed.dart';
 import 'package:intentions_flutter/pages/notifications.dart';
@@ -51,13 +50,7 @@ class Home extends StatelessWidget {
           ),
           body: TabBarView(
             children: [
-              Consumer(
-                builder: (_, ref, _) {
-                  return ref.watch(authUserProvider).isLoading
-                      ? Placeholder()
-                      : FeedTab();
-                },
-              ),
+              FeedTab(),
               Search(),
               CreateTab(),
               Notifications(),

@@ -19,7 +19,7 @@ class _SignUpState extends State<SignUp> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void onSubmit({required Function() onSuccess}) async {
+  void onSubmit() async {
     final email = emailController.text;
     final password = passwordController.text;
 
@@ -44,8 +44,6 @@ class _SignUpState extends State<SignUp> {
         email: email,
         password: password,
       );
-
-      onSuccess();
     } on FirebaseAuthException catch (e) {
       print(e);
     } catch (e) {
@@ -96,16 +94,7 @@ class _SignUpState extends State<SignUp> {
                 ),
               ],
             ),
-            FilledButton(
-              onPressed: () {
-                onSubmit(
-                  onSuccess: () {
-                    context.go('/');
-                  },
-                );
-              },
-              child: Text("Sign up"),
-            ),
+            FilledButton(onPressed: onSubmit, child: Text("Sign up")),
             Column(
               children: [
                 Text("Already a user?"),

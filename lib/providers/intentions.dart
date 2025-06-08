@@ -28,7 +28,7 @@ class CreateIntentionBody {
 }
 
 Future<void> createIntention(Ref ref, CreateIntentionBody body) async {
-  final user = await ref.read(authUserProvider.future);
+  final user = ref.read(authUserProvider).user;
   final token = await user?.getIdToken();
 
   await http.post(

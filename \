@@ -13,7 +13,7 @@ class Post extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final imageUrl = ref.watch(imageUrlProvider(post.image));
-    print(imageUrl);
+    print(imageUrl.value);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,18 +48,12 @@ class Post extends ConsumerWidget {
             ],
           ),
         ),
-        imageUrl.when(
-          error: (_, _) => Text('error fetching image'),
-          loading: () => CircularProgressIndicator(),
-          data: (url) {
-            if (url != null) {
-              return Image(image: NetworkImage(url), fit: BoxFit.fill);
-            }
-            return Container();
-          },
-        ),
         switch (imageUrl) {
-          AsyncData<void> _ => Text('hi'),
+          AsyncData<String>(:final value) => Image(
+            image: NetworkImage(value),
+            fit: BoxFit.fill,
+          ),
+          AsyncData<void> _ => Container(),
           AsyncError _ => Text('error fetching image'),
           _ => CircularProgressIndicator(),
         },
