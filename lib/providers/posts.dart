@@ -49,17 +49,24 @@ class CreatePostBody {
 
 Future<void> createPost(Ref ref, CreatePostBody body) async {
   final user = ref.read(authUserProvider).user;
-  final token = await user?.getIdToken();
+  if (user == null) {
+    throw StateError('must be signed in to create post');
+  }
+
+  final token = await user.getIdToken();
 
   await http.post(
     Uri.http('localhost:3001', '/posts'),
     headers: {'Authorization': token ?? '', 'Content-Type': 'application/json'},
     body: jsonEncode({
       'intentionId': body.intentionId,
-      'image': body.image,
       'description': body.description,
+      ...body.image != null ? {'image': body.image} : {},
     }),
   );
+
+  ref.invalidate(feedProvider);
+  ref.invalidate(postsProvider(user.uid));
 }
 
 final createPostProvider = Provider((ref) {

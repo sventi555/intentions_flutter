@@ -35,7 +35,7 @@ class CreateIntentionState extends ConsumerState {
                 Expanded(
                   child: FilledButton(
                     onPressed: () {
-                      context.go('/');
+                      context.pop();
                     },
                     style: FilledButton.styleFrom(backgroundColor: Colors.grey),
                     child: Text("Cancel"),
@@ -43,13 +43,14 @@ class CreateIntentionState extends ConsumerState {
                 ),
                 Expanded(
                   child: FilledButton(
-                    onPressed: () {
+                    onPressed: () async {
                       final createIntention = ref.read(createIntentionProvider);
-                      createIntention(
+                      await createIntention(
                         CreateIntentionBody(name: nameController.text),
-                      ).then((_) {
-                        print("created intention");
-                      });
+                      );
+
+                      if (!context.mounted) return;
+                      context.pop();
                     },
                     child: Text("Create"),
                   ),

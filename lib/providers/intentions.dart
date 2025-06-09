@@ -29,13 +29,18 @@ class CreateIntentionBody {
 
 Future<void> createIntention(Ref ref, CreateIntentionBody body) async {
   final user = ref.read(authUserProvider).user;
-  final token = await user?.getIdToken();
+  if (user == null) {
+    throw StateError('must be signed in to create intention');
+  }
+  final token = await user.getIdToken();
 
   await http.post(
     Uri.http('localhost:3001', '/intentions'),
     headers: {'Authorization': token ?? '', 'Content-Type': 'application/json'},
     body: jsonEncode({'name': body.name}),
   );
+
+  ref.invalidate(intentionsProvider(user.uid));
 }
 
 final createIntentionProvider = Provider((ref) {

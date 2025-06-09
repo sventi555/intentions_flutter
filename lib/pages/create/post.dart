@@ -124,7 +124,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                 IconButton(
                   icon: Icon(Icons.add),
                   onPressed: () {
-                    context.go('/intention');
+                    context.push('/intention');
                   },
                 ),
               ],
@@ -170,7 +170,9 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                       backgroundColor: Theme.of(context).colorScheme.secondary,
                     ),
                     child: Text("Discard"),
-                    onPressed: () {},
+                    onPressed: () {
+                      DefaultTabController.of(context).animateTo(0);
+                    },
                   ),
                 ),
                 SizedBox(width: 8),
@@ -180,15 +182,15 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                     onPressed: () async {
                       final createPost = ref.read(createPostProvider);
                       final img = image;
-                      createPost(
+                      await createPost(
                         CreatePostBody(
                           intentionId: selectedIntentionId ?? '',
                           image: img != null ? await toImageDataUrl(img) : null,
                           description: descriptionController.text,
                         ),
-                      ).then((_) {
-                        print('created post');
-                      });
+                      );
+                      if (!context.mounted) return;
+                      DefaultTabController.of(context).animateTo(0);
                     },
                   ),
                 ),

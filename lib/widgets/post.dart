@@ -13,7 +13,6 @@ class Post extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final imageUrl = ref.watch(imageUrlProvider(post.image));
-    print(imageUrl);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,11 +57,6 @@ class Post extends ConsumerWidget {
             return Container();
           },
         ),
-        switch (imageUrl) {
-          AsyncData<void> _ => Text('hi'),
-          AsyncError _ => Text('error fetching image'),
-          _ => CircularProgressIndicator(),
-        },
         Container(
           padding: EdgeInsets.all(8),
           child: Text(post.description ?? ''),

@@ -35,7 +35,7 @@ class FirebaseController {
 
       await auth.useAuthEmulator('localhost', 9099);
       db.useFirestoreEmulator('localhost', 8080);
-      storage.useStorageEmulator('localhost', 9199);
+      await storage.useStorageEmulator('localhost', 9199);
     } else {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
