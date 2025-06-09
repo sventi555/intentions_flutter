@@ -2,25 +2,76 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intentions_flutter/pages/auth/sign_in.dart';
+import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/pages/create/intention.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/utils/image.dart';
 
-final _router = GoRouter(
-  routes: [
-    GoRoute(path: '/', builder: (context, state) => CreatePost()),
-    GoRoute(path: '/intention', builder: (context, state) => CreateIntention()),
-  ],
-);
+final routerProvider = Provider((ref) {
+  final user = ref.watch(authUserProvider).user;
 
-class CreateTab extends StatelessWidget {
+  return GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => CreatePost(),
+        redirect: (context, state) {
+          if (user == null) {
+            return '/signin';
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: '/intention',
+        builder: (context, state) => CreateIntention(),
+        redirect: (context, state) {
+          if (user == null) {
+            return '/signin';
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: '/signin',
+        builder: (context, state) => SignIn(),
+        redirect: (context, state) {
+          if (user != null) {
+            return '/';
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => SignUp(),
+        redirect: (context, state) {
+          if (user != null) {
+            return '/';
+          }
+          return null;
+        },
+      ),
+    ],
+  );
+});
+
+class CreateTab extends ConsumerWidget {
   const CreateTab({super.key});
 
   @override
-  Widget build(BuildContext build) {
-    return MaterialApp.router(routerConfig: _router);
+  Widget build(BuildContext build, WidgetRef ref) {
+    final user = ref.watch(authUserProvider);
+    final router = ref.watch(routerProvider);
+
+    if (user.loading) {
+      return CircularProgressIndicator();
+    }
+
+    return MaterialApp.router(routerConfig: router);
   }
 }
 
