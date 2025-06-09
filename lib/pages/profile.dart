@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/providers/user.dart';
+import 'package:intentions_flutter/utils/image.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -82,6 +84,7 @@ class Profile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userVal = ref.watch(userProvider(userId));
+    final updateUser = ref.watch(updateUserProvider);
 
     return userVal.when(
       data: (user) => Scaffold(
@@ -92,7 +95,21 @@ class Profile extends ConsumerWidget {
               child: Row(
                 spacing: 8,
                 children: [
-                  ProfilePic(image: user.image, size: 128),
+                  GestureDetector(
+                    onTap: () async {
+                      final ImagePicker picker = ImagePicker();
+                      final image = await picker.pickImage(
+                        source: ImageSource.gallery,
+                      );
+                      if (image == null) return;
+
+                      final imageUrl = await toImageDataUrl(image);
+                      if (imageUrl == null) return;
+
+                      await updateUser(UpdateUserBody(image: imageUrl));
+                    },
+                    child: ProfilePic(image: user.image, size: 128),
+                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
