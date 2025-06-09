@@ -12,24 +12,52 @@ import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-GoRouter _getRouter(User? user) => GoRouter(
-  routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) =>
-          user != null ? Profile(userId: user.uid) : Container(),
-      redirect: (context, state) {
-        if (user == null) {
-          return '/signin';
-        } else {
+final routerProvider = Provider((ref) {
+  final user = ref.watch(authUserProvider).user;
+
+  return GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) {
+          if (user == null) {
+            throw StateError('should redirect to sign in');
+          }
+
+          return Profile(userId: user.uid);
+        },
+        redirect: (context, state) {
+          if (user == null) {
+            return '/signin';
+          } else {
+            return null;
+          }
+        },
+      ),
+      GoRoute(
+        path: '/signin',
+        redirect: (context, state) {
+          if (user != null) {
+            return '/';
+          }
           return null;
-        }
-      },
-    ),
-    GoRoute(path: '/signin', builder: (context, state) => SignIn()),
-    GoRoute(path: '/signup', builder: (context, state) => SignUp()),
-  ],
-);
+        },
+        builder: (context, state) => SignIn(),
+      ),
+      GoRoute(
+        path: '/signup',
+        redirect: (context, state) {
+          if (user != null) {
+            return '/';
+          }
+          return null;
+        },
+
+        builder: (context, state) => SignUp(),
+      ),
+    ],
+  );
+});
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -37,12 +65,13 @@ class ProfileTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(authUserProvider);
+    final router = ref.watch(routerProvider);
 
     if (userState.loading) {
       return CircularProgressIndicator();
     }
 
-    return MaterialApp.router(routerConfig: _getRouter(userState.user));
+    return MaterialApp.router(routerConfig: router);
   }
 }
 
@@ -56,8 +85,6 @@ class Profile extends ConsumerWidget {
     final userVal = ref.watch(userProvider(userId));
 
     return userVal.when(
-      error: (_, _) => Text('error fetching user'),
-      loading: () => CircularProgressIndicator(),
       data: (user) => Scaffold(
         body: Column(
           children: [
@@ -102,6 +129,8 @@ class Profile extends ConsumerWidget {
           ],
         ),
       ),
+      error: (_, _) => Text('error fetching user'),
+      loading: () => CircularProgressIndicator(),
     );
   }
 }
@@ -115,13 +144,12 @@ class ProfilePosts extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final posts = ref.watch(postsProvider(userId));
 
-    return switch (posts) {
-      AsyncData(:final value) => ListView(
-        children: [for (var post in value) Post(post: post)],
-      ),
-      AsyncError() => Text('error fetching posts'),
-      _ => CircularProgressIndicator(),
-    };
+    return posts.when(
+      data: (val) =>
+          ListView(children: [for (var post in val) Post(post: post)]),
+      error: (_, _) => Text('error fetching posts'),
+      loading: () => CircularProgressIndicator(),
+    );
   }
 }
 
@@ -170,8 +198,8 @@ class ProfileIntentions extends ConsumerWidget {
                     ),
                 ],
               ),
-              loading: () => CircularProgressIndicator(),
               error: (_, _) => Text('error fetching intentions'),
+              loading: () => CircularProgressIndicator(),
             ),
           ),
         ],

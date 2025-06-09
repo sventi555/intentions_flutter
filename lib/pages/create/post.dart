@@ -56,16 +56,17 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                       selectedIntentionId = val;
                     });
                   },
-                  dropdownMenuEntries: switch (intentions) {
-                    AsyncData(:final value) => [
-                      for (var intention in value)
+                  dropdownMenuEntries: intentions.when(
+                    data: (val) => [
+                      for (var intention in val)
                         DropdownMenuEntry<String>(
                           label: intention.name,
                           value: intention.id,
                         ),
                     ],
-                    _ => [],
-                  },
+                    error: (_, _) => [],
+                    loading: () => [],
+                  ),
                   label: Text("Select an intention"),
                 ),
                 SizedBox(width: 4),
@@ -129,20 +130,14 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                       final createPost = ref.read(createPostProvider);
                       final img = image;
                       createPost(
-                            CreatePostBody(
-                              intentionId: selectedIntentionId ?? '',
-                              image: img != null
-                                  ? await toImageDataUrl(img)
-                                  : null,
-                              description: descriptionController.text,
-                            ),
-                          )
-                          .then((_) {
-                            print('created post');
-                          })
-                          .catchError((e) {
-                            print(e);
-                          });
+                        CreatePostBody(
+                          intentionId: selectedIntentionId ?? '',
+                          image: img != null ? await toImageDataUrl(img) : null,
+                          description: descriptionController.text,
+                        ),
+                      ).then((_) {
+                        print('created post');
+                      });
                     },
                   ),
                 ),

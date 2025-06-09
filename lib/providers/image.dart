@@ -9,12 +9,5 @@ final imageUrlProvider = FutureProvider.family<String?, String?>((
     return null;
   }
 
-  try {
-    final url = await firebase.storage.ref().child(imagePath).getDownloadURL();
-    return url;
-  } catch (e) {
-    print(e);
-  }
-
-  return null;
+  return firebase.storage.ref().child(imagePath).getDownloadURL();
 });
