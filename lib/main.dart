@@ -53,7 +53,7 @@ class Home extends StatelessWidget {
               FeedTab(),
               Search(),
               CreateTab(),
-              Notifications(),
+              NotificationsTab(),
               ProfileTab(),
             ],
           ),
