@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:intentions_flutter/api_config.dart';
 import 'package:intentions_flutter/firebase.dart';
 
 class SignUp extends StatefulWidget {
@@ -25,7 +26,7 @@ class _SignUpState extends State<SignUp> {
 
     try {
       var res = await http.post(
-        Uri.http('0.0.0.0:3001', 'users'),
+        Uri.parse('${ApiConfig.baseUrl}/users'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': usernameController.text,

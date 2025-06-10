@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:intentions_flutter/api_config.dart';
 import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/models/user.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
@@ -50,7 +51,7 @@ Future<void> updateUser(Ref ref, UpdateUserBody body) async {
   final token = await user.getIdToken();
 
   await http.patch(
-    Uri.http('localhost:3001', '/users'),
+    Uri.parse('${ApiConfig.baseUrl}/users'),
     headers: {'Authorization': token ?? '', 'Content-Type': 'application/json'},
     body: jsonEncode({
       ...body.image != null ? {'image': body.image} : {},

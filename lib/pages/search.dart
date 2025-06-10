@@ -1,8 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/models/user.dart';
+import 'package:intentions_flutter/pages/profile.dart';
 import 'package:intentions_flutter/providers/user.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
+
+final _router = GoRouter(
+  routes: [
+    GoRoute(path: '/', builder: (context, state) => Search()),
+    GoRoute(
+      path: '/user/:userId',
+      builder: (context, state) {
+        final userId = state.pathParameters['userId']!;
+
+        return Profile(userId: userId);
+      },
+    ),
+  ],
+);
+
+class SearchTab extends StatelessWidget {
+  const SearchTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(routerConfig: _router);
+  }
+}
 
 class Search extends ConsumerStatefulWidget {
   const Search({super.key});
@@ -55,6 +80,9 @@ class _SearchState extends ConsumerState<Search> {
                 children: [
                   for (final user in users)
                     ListTile(
+                      onTap: () {
+                        context.push('/user/${user.id}');
+                      },
                       leading: ProfilePic(image: user.image),
                       title: Text(user.username),
                     ),

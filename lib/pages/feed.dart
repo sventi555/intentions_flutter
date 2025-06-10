@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/firebase.dart';
+import 'package:intentions_flutter/pages/profile.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
@@ -21,6 +22,14 @@ final routerProvider = Provider((ref) {
             return '/signin';
           }
           return null;
+        },
+      ),
+      GoRoute(
+        path: '/user/:userId',
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+
+          return Profile(userId: userId);
         },
       ),
       GoRoute(

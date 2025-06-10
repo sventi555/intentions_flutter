@@ -37,9 +37,10 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 5,
-      child: SafeArea(
-        child: Scaffold(
-          bottomNavigationBar: TabBar(
+      child: Scaffold(
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: TabBar(
             tabs: [
               Tab(icon: Icon(Icons.home)),
               Tab(icon: Icon(Icons.search)),
@@ -48,10 +49,13 @@ class Home extends StatelessWidget {
               Tab(icon: Icon(Icons.account_circle)),
             ],
           ),
-          body: TabBarView(
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: TabBarView(
             children: [
               FeedTab(),
-              Search(),
+              SearchTab(),
               CreateTab(),
               NotificationsTab(),
               ProfileTab(),

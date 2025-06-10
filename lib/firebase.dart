@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -33,9 +35,11 @@ class FirebaseController {
         bucket: 'demo-intentions.appspot.com',
       );
 
-      await auth.useAuthEmulator('localhost', 9099);
-      db.useFirestoreEmulator('localhost', 8080);
-      await storage.useStorageEmulator('localhost', 9199);
+      final host = Platform.isAndroid ? '10.0.2.2' : 'localhost';
+      print(host);
+      await auth.useAuthEmulator(host, 9099);
+      db.useFirestoreEmulator(host, 8080);
+      await storage.useStorageEmulator(host, 9199);
     } else {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/providers/image.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 import 'package:intentions_flutter/models/post.dart' as post_models;
@@ -9,6 +10,15 @@ class Post extends ConsumerWidget {
   final post_models.Post post;
 
   const Post({super.key, required this.post});
+
+  void goToProfile(BuildContext context) {
+    final userProfileUri = '/user/${post.userId}';
+    final alreadyOnProfile =
+        GoRouter.of(context).state.uri.toString() == userProfileUri;
+    if (!alreadyOnProfile) {
+      context.push('/user/${post.userId}');
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,9 +37,19 @@ class Post extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      ProfilePic(image: post.user.image),
+                      GestureDetector(
+                        onTap: () {
+                          goToProfile(context);
+                        },
+                        child: ProfilePic(image: post.user.image),
+                      ),
                       SizedBox(width: 8),
-                      Text(post.user.username),
+                      GestureDetector(
+                        onTap: () {
+                          goToProfile(context);
+                        },
+                        child: Text(post.user.username),
+                      ),
                     ],
                   ),
                   Text(

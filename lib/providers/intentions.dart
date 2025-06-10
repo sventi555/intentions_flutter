@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:intentions_flutter/api_config.dart';
 import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/models/intention.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
@@ -35,7 +36,7 @@ Future<void> createIntention(Ref ref, CreateIntentionBody body) async {
   final token = await user.getIdToken();
 
   await http.post(
-    Uri.http('localhost:3001', '/intentions'),
+    Uri.parse('${ApiConfig.baseUrl}/intentions'),
     headers: {'Authorization': token ?? '', 'Content-Type': 'application/json'},
     body: jsonEncode({'name': body.name}),
   );

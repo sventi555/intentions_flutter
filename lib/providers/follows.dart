@@ -2,40 +2,62 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:intentions_flutter/api_config.dart';
 import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/models/follow.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 
-final followsToUserProvider = FutureProvider.family<List<Follow>, String?>((
-  ref,
-  toUser,
-) async {
-  if (toUser == null) {
+final followsToMeProvider = FutureProvider<List<Follow>>((ref) async {
+  final userId = ref.watch(authUserProvider).user?.uid;
+
+  if (userId == null) {
     return [];
   }
 
-  final follows = await firebase.db.collection('follows/$toUser/from').get();
+  final follows = await firebase.db.collection('follows/$userId/from').get();
 
-  return follows.docs.map((follow) => Follow.fromJson(follow.data())).toList();
+  return follows.docs
+      .map((follow) => Follow.fromJson(follow.id, follow.data()))
+      .toList();
 });
 
-enum RespondAction { accept, decline }
-
-Future<void> respondToFollow(Ref ref, RespondAction action) async {
+Future<void> followUser(Ref ref, String userId) async {
   final user = ref.read(authUserProvider).user;
   final token = await user?.getIdToken();
 
   await http.post(
-    Uri.http('localhost:3001', '/posts'),
+    Uri.parse('${ApiConfig.baseUrl}/follows/$userId'),
+    headers: {'Authorization': token ?? ''},
+  );
+}
+
+enum RespondAction { accept, decline }
+
+class RespondToFollowBody {
+  final RespondAction action;
+
+  const RespondToFollowBody({required this.action});
+}
+
+Future<void> respondToFollow(
+  Ref ref,
+  String userId,
+  RespondToFollowBody body,
+) async {
+  final user = ref.read(authUserProvider).user;
+  final token = await user?.getIdToken();
+
+  await http.post(
+    Uri.parse('${ApiConfig.baseUrl}/follows/respond/$userId'),
     headers: {'Authorization': token ?? '', 'Content-Type': 'application/json'},
     body: jsonEncode({
-      'action': action == RespondAction.accept ? 'accept' : 'decline',
+      'action': body.action == RespondAction.accept ? 'accept' : 'decline',
     }),
   );
 }
 
 final respondToFollowProvider = Provider((ref) {
-  return (RespondAction action) async {
-    await respondToFollow(ref, action);
+  return (String userId, RespondToFollowBody body) async {
+    await respondToFollow(ref, userId, body);
   };
 });

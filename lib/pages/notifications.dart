@@ -68,14 +68,7 @@ class Notifications extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = ref.watch(authUserProvider).user?.uid;
-
-    if (userId == null) {
-      throw StateError('user should be signed in to view notifications');
-    }
-
-    final List<Follow> follows =
-        ref.watch(followsToUserProvider(userId)).value ?? [];
+    final List<Follow> follows = ref.watch(followsToMeProvider).value ?? [];
     final respondToFollow = ref.read(respondToFollowProvider);
 
     return Scaffold(
@@ -96,13 +89,21 @@ class Notifications extends ConsumerWidget {
                         IconButton(
                           icon: Icon(Icons.check),
                           onPressed: () {
-                            respondToFollow(RespondAction.accept);
+                            respondToFollow(
+                              follow.fromUser.id,
+                              RespondToFollowBody(action: RespondAction.accept),
+                            );
                           },
                         ),
                         IconButton(
                           icon: Icon(Icons.close),
                           onPressed: () {
-                            respondToFollow(RespondAction.decline);
+                            respondToFollow(
+                              follow.fromUser.id,
+                              RespondToFollowBody(
+                                action: RespondAction.decline,
+                              ),
+                            );
                           },
                         ),
                       ],
