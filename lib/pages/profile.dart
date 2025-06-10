@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intentions_flutter/models/follow.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
+import 'package:intentions_flutter/providers/follows.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/providers/user.dart';
@@ -20,13 +22,7 @@ final routerProvider = Provider((ref) {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) {
-          if (user == null) {
-            throw StateError('should redirect to sign in');
-          }
-
-          return Profile(userId: user.uid);
-        },
+        builder: (context, state) => MyProfile(),
         redirect: (context, state) {
           if (user == null) {
             return '/signin';
@@ -76,6 +72,20 @@ class ProfileTab extends ConsumerWidget {
   }
 }
 
+class MyProfile extends ConsumerWidget {
+  const MyProfile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authUser = ref.watch(authUserProvider).value;
+    if (authUser == null) {
+      throw StateError('must be signed in to see my profile');
+    }
+
+    return Profile(userId: authUser.uid);
+  }
+}
+
 class Profile extends ConsumerWidget {
   final String userId;
 
@@ -83,10 +93,22 @@ class Profile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userVal = ref.watch(userProvider(userId));
-    final updateUser = ref.watch(updateUserProvider);
+    final authUser = ref.watch(authUserProvider);
+    final profileUser = ref.watch(userProvider(userId));
+    final follow = ref.watch(followFromMeProvider(userId)).value;
+    final isSelf = userId == authUser.value?.uid;
 
-    return userVal.when(
+    final updateUser = ref.watch(updateUserProvider);
+    final followUser = ref.watch(followUserProvider);
+    final unfollowUser = ref.watch(unfollowUserProvider);
+
+    String followButtonText = 'follow';
+    if (follow != null) {
+      followButtonText = follow.status == FollowStatus.pending
+          ? 'pending'
+          : 'unfollow';
+    }
+    return profileUser.when(
       data: (user) => Scaffold(
         body: Column(
           children: [
@@ -96,18 +118,20 @@ class Profile extends ConsumerWidget {
                 spacing: 8,
                 children: [
                   GestureDetector(
-                    onTap: () async {
-                      final ImagePicker picker = ImagePicker();
-                      final image = await picker.pickImage(
-                        source: ImageSource.gallery,
-                      );
-                      if (image == null) return;
+                    onTap: isSelf
+                        ? () async {
+                            final ImagePicker picker = ImagePicker();
+                            final image = await picker.pickImage(
+                              source: ImageSource.gallery,
+                            );
+                            if (image == null) return;
 
-                      final imageUrl = await toImageDataUrl(image);
-                      if (imageUrl == null) return;
+                            final imageUrl = await toImageDataUrl(image);
+                            if (imageUrl == null) return;
 
-                      await updateUser(UpdateUserBody(image: imageUrl));
-                    },
+                            await updateUser(UpdateUserBody(image: imageUrl));
+                          }
+                        : null,
                     child: ProfilePic(image: user.image, size: 128),
                   ),
                   Expanded(
@@ -116,7 +140,20 @@ class Profile extends ConsumerWidget {
                       spacing: 8,
                       children: [
                         Text(user.username, style: TextStyle(fontSize: 16)),
-                        FilledButton(onPressed: () {}, child: Text("follow")),
+                        if (!isSelf)
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: follow != null
+                                  ? Theme.of(context).colorScheme.secondary
+                                  : Theme.of(context).colorScheme.primary,
+                            ),
+                            onPressed: () {
+                              follow == null
+                                  ? followUser(userId)
+                                  : unfollowUser(userId);
+                            },
+                            child: Text(followButtonText),
+                          ),
                       ],
                     ),
                   ),
