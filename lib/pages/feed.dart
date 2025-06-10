@@ -10,7 +10,7 @@ import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 
 final routerProvider = Provider((ref) {
-  final user = ref.watch(authUserProvider).user;
+  final user = ref.watch(authUserProvider).value;
 
   return GoRouter(
     routes: [
@@ -61,10 +61,10 @@ class FeedTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userState = ref.watch(authUserProvider);
+    final user = ref.watch(authUserProvider);
     final router = ref.watch(routerProvider);
 
-    if (userState.loading) {
+    if (user.isLoading) {
       return CircularProgressIndicator();
     }
 

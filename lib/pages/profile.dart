@@ -14,7 +14,7 @@ import 'package:intentions_flutter/widgets/profile_pic.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 final routerProvider = Provider((ref) {
-  final user = ref.watch(authUserProvider).user;
+  final user = ref.watch(authUserProvider).value;
 
   return GoRouter(
     routes: [
@@ -65,10 +65,10 @@ class ProfileTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userState = ref.watch(authUserProvider);
+    final user = ref.watch(authUserProvider);
     final router = ref.watch(routerProvider);
 
-    if (userState.loading) {
+    if (user.isLoading) {
       return CircularProgressIndicator();
     }
 

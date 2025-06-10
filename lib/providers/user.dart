@@ -43,7 +43,7 @@ class UpdateUserBody {
 }
 
 Future<void> updateUser(Ref ref, UpdateUserBody body) async {
-  final user = ref.read(authUserProvider).user;
+  final user = await ref.read(authUserProvider.future);
   if (user == null) {
     throw StateError('must be signed in to update user');
   }

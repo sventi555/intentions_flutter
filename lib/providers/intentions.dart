@@ -29,7 +29,7 @@ class CreateIntentionBody {
 }
 
 Future<void> createIntention(Ref ref, CreateIntentionBody body) async {
-  final user = ref.read(authUserProvider).user;
+  final user = await ref.read(authUserProvider.future);
   if (user == null) {
     throw StateError('must be signed in to create intention');
   }

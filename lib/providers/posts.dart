@@ -22,10 +22,10 @@ final postsProvider = FutureProvider.family<List<Post>, String>((
 });
 
 final feedProvider = FutureProvider<List<Post>>((ref) async {
-  final user = ref.watch(authUserProvider).user;
+  final user = await ref.watch(authUserProvider.future);
 
   if (user == null) {
-    return [];
+    throw StateError('must be signed in to fetch feed');
   }
 
   final feed = await firebase.db
@@ -49,7 +49,7 @@ class CreatePostBody {
 }
 
 Future<void> createPost(Ref ref, CreatePostBody body) async {
-  final user = ref.read(authUserProvider).user;
+  final user = await ref.read(authUserProvider.future);
   if (user == null) {
     throw StateError('must be signed in to create post');
   }

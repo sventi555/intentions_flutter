@@ -8,13 +8,14 @@ import 'package:intentions_flutter/models/follow.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 
 final followsToMeProvider = FutureProvider<List<Follow>>((ref) async {
-  final userId = ref.watch(authUserProvider).user?.uid;
-
-  if (userId == null) {
-    return [];
+  final user = await ref.watch(authUserProvider.future);
+  if (user == null) {
+    throw StateError('must be signed in to get follows to self');
   }
 
-  final follows = await firebase.db.collection('follows/$userId/from').get();
+  final follows = await firebase.db
+      .collection('follows/${user.uid}/from')
+      .get();
 
   return follows.docs
       .map((follow) => Follow.fromJson(follow.id, follow.data()))
@@ -22,8 +23,12 @@ final followsToMeProvider = FutureProvider<List<Follow>>((ref) async {
 });
 
 Future<void> followUser(Ref ref, String userId) async {
-  final user = ref.read(authUserProvider).user;
-  final token = await user?.getIdToken();
+  final user = await ref.read(authUserProvider.future);
+  if (user == null) {
+    throw StateError('must be signed in to follow user');
+  }
+
+  final token = await user.getIdToken();
 
   await http.post(
     Uri.parse('${ApiConfig.baseUrl}/follows/$userId'),
@@ -44,8 +49,11 @@ Future<void> respondToFollow(
   String userId,
   RespondToFollowBody body,
 ) async {
-  final user = ref.read(authUserProvider).user;
-  final token = await user?.getIdToken();
+  final user = await ref.read(authUserProvider.future);
+  if (user == null) {
+    throw StateError('must be signed in to respond to follow');
+  }
+  final token = await user.getIdToken();
 
   await http.post(
     Uri.parse('${ApiConfig.baseUrl}/follows/respond/$userId'),

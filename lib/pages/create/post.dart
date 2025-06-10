@@ -11,7 +11,7 @@ import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/utils/image.dart';
 
 final routerProvider = Provider((ref) {
-  final user = ref.watch(authUserProvider).user;
+  final user = ref.watch(authUserProvider).value;
 
   return GoRouter(
     routes: [
@@ -67,7 +67,7 @@ class CreateTab extends ConsumerWidget {
     final user = ref.watch(authUserProvider);
     final router = ref.watch(routerProvider);
 
-    if (user.loading) {
+    if (user.isLoading) {
       return CircularProgressIndicator();
     }
 
@@ -89,8 +89,11 @@ class _CreatePostState extends ConsumerState<CreatePost> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = ref.watch(authUserProvider).user?.uid;
-    final intentions = ref.watch(intentionsProvider(userId ?? ''));
+    final user = ref.watch(authUserProvider).value;
+    if (user == null) {
+      throw StateError('must be signed in to see create post page');
+    }
+    final intentions = ref.watch(intentionsProvider(user.uid));
 
     return Scaffold(
       body: Container(

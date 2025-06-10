@@ -9,7 +9,7 @@ import 'package:intentions_flutter/providers/follows.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 
 final routerProvider = Provider((ref) {
-  final user = ref.watch(authUserProvider).user;
+  final user = ref.watch(authUserProvider).value;
 
   return GoRouter(
     routes: [
@@ -52,10 +52,10 @@ class NotificationsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userState = ref.watch(authUserProvider);
+    final user = ref.watch(authUserProvider);
     final router = ref.watch(routerProvider);
 
-    if (userState.loading) {
+    if (user.isLoading) {
       return CircularProgressIndicator();
     }
 

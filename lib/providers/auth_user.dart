@@ -1,23 +1,35 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intentions_flutter/firebase.dart';
 
-class AuthUserState {
-  final bool loading;
-  final User? user;
+// class AuthUserState {
+//   final bool loading;
+//   final User? user;
+//
+//   const AuthUserState({this.loading = true, this.user});
+// }
 
-  const AuthUserState({this.loading = true, this.user});
-}
-
-class AuthUserNotifier extends Notifier<AuthUserState> {
+class AuthUserNotifier extends AsyncNotifier<User?> {
   @override
-  build() {
-    firebase.auth.authStateChanges().listen((u) {
-      state = AuthUserState(loading: false, user: u);
+  build() async {
+    final stream = firebase.auth.authStateChanges();
+
+    bool isFirst = true;
+    final completer = Completer<User?>();
+
+    stream.listen((u) {
+      if (isFirst) {
+        completer.complete(u);
+        isFirst = false;
+      } else {
+        state = AsyncValue.data(u);
+      }
     });
 
-    return AuthUserState();
+    return completer.future;
   }
 }
 
-final authUserProvider = NotifierProvider(() => AuthUserNotifier());
+final authUserProvider = AsyncNotifierProvider(() => AuthUserNotifier());
