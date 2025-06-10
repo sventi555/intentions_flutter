@@ -7,6 +7,7 @@ import 'package:intentions_flutter/api_config.dart';
 import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/models/post.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
+import 'package:intentions_flutter/providers/intentions.dart';
 
 final postsProvider = FutureProvider.family<List<Post>, String>((
   ref,
@@ -34,6 +35,23 @@ final feedProvider = FutureProvider<List<Post>>((ref) async {
       .get();
 
   return feed.docs.map((d) => Post.fromJson(d.id, d.data())).toList();
+});
+
+final intentionPostsProvider = FutureProvider.family<List<Post>, String>((
+  ref,
+  intentionId,
+) async {
+  final intention = await ref.watch(intentionProvider(intentionId).future);
+
+  final posts = await firebase.db
+      .collection('posts')
+      // needed to appease firestore rule logic
+      .where('userId', isEqualTo: intention.userId)
+      .where('intentionId', isEqualTo: intentionId)
+      .orderBy('createdAt', descending: true)
+      .get();
+
+  return posts.docs.map((doc) => Post.fromJson(doc.id, doc.data())).toList();
 });
 
 class CreatePostBody {

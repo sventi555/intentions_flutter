@@ -7,6 +7,23 @@ import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/models/intention.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 
+final intentionProvider = FutureProvider.family<Intention, String>((
+  ref,
+  intentionId,
+) async {
+  final intention = await firebase.db
+      .collection('intentions')
+      .doc(intentionId)
+      .get();
+
+  final intentionData = intention.data();
+  if (intentionData == null) {
+    throw Exception('incentive does not exist');
+  }
+
+  return Intention.fromJson(intentionId, intentionData);
+});
+
 final intentionsProvider = FutureProvider.family<List<Intention>, String>((
   ref,
   userId,

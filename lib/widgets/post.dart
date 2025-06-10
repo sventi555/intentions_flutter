@@ -60,9 +60,14 @@ class Post extends ConsumerWidget {
                 ],
               ),
               SizedBox(height: 8),
-              Chip(
-                label: Text(post.intention.name),
-                padding: EdgeInsets.all(0),
+              GestureDetector(
+                onTap: () {
+                  context.push('/intention/${post.intentionId}');
+                },
+                child: Chip(
+                  label: Text(post.intention.name),
+                  padding: EdgeInsets.all(0),
+                ),
               ),
             ],
           ),
