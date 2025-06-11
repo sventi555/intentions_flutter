@@ -13,20 +13,26 @@ class ProfilePic extends ConsumerWidget {
     final imageUrl = ref.watch(imageUrlProvider(image));
 
     return Container(
+      padding: EdgeInsets.all(2),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          width: 1,
+          width: 2,
           color: Theme.of(context).colorScheme.secondary,
         ),
-        image: DecorationImage(
-          image: NetworkImage(
-            imageUrl.value ?? "https://placehold.co/${size.toInt()}/png",
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: NetworkImage(
+              imageUrl.value ?? "https://placehold.co/${size.toInt()}/png",
+            ),
           ),
         ),
+        width: size,
+        height: size,
       ),
-      width: size,
-      height: size,
     );
   }
 }
