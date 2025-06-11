@@ -4,23 +4,42 @@ import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/models/follow.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
+import 'package:intentions_flutter/pages/intention.dart';
+import 'package:intentions_flutter/pages/profile.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/follows.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 
-final routerProvider = Provider((ref) {
+final notificationsRouterProvider = Provider((ref) {
   final user = ref.watch(authUserProvider).value;
 
   return GoRouter(
     routes: [
       GoRoute(
         path: '/',
+        name: '/',
         builder: (context, state) => Notifications(),
         redirect: (context, state) {
           if (user == null) {
             return '/signin';
           }
           return null;
+        },
+      ),
+      GoRoute(
+        path: '/user/:userId',
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+
+          return Profile(userId: userId);
+        },
+      ),
+      GoRoute(
+        path: '/intention/:intentionId',
+        builder: (context, state) {
+          final intentionId = state.pathParameters['intentionId']!;
+
+          return Intention(intentionId: intentionId);
         },
       ),
       GoRoute(
@@ -53,7 +72,7 @@ class NotificationsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authUserProvider);
-    final router = ref.watch(routerProvider);
+    final router = ref.watch(notificationsRouterProvider);
 
     if (user.isLoading) {
       return CircularProgressIndicator();

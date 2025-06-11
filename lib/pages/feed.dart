@@ -10,13 +10,14 @@ import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 
-final routerProvider = Provider((ref) {
+final feedRouterProvider = Provider((ref) {
   final user = ref.watch(authUserProvider).value;
 
   return GoRouter(
     routes: [
       GoRoute(
         path: '/',
+        name: '/',
         builder: (context, state) => Feed(),
         redirect: (context, state) {
           if (user == null) {
@@ -71,7 +72,7 @@ class FeedTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authUserProvider);
-    final router = ref.watch(routerProvider);
+    final router = ref.watch(feedRouterProvider);
 
     if (user.isLoading) {
       return CircularProgressIndicator();

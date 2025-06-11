@@ -15,6 +15,10 @@ class ProfilePic extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
+        border: Border.all(
+          width: 1,
+          color: Theme.of(context).colorScheme.secondary,
+        ),
         image: DecorationImage(
           image: NetworkImage(
             imageUrl.value ?? "https://placehold.co/${size.toInt()}/png",

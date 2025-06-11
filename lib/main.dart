@@ -30,17 +30,37 @@ class App extends StatelessWidget {
   }
 }
 
-class Home extends StatelessWidget {
+class Home extends ConsumerWidget {
   const Home({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final feedRouter = ref.watch(feedRouterProvider);
+    final searchRouter = ref.watch(searchRouterProvider);
+    final createRouter = ref.watch(createRouterProvider);
+    final notificationsRouter = ref.watch(notificationsRouterProvider);
+    final profileRouter = ref.watch(profileRouterProvider);
+
     return DefaultTabController(
       length: 5,
       child: Scaffold(
         bottomNavigationBar: SafeArea(
           top: false,
           child: TabBar(
+            onTap: (tabIndex) {
+              switch (tabIndex) {
+                case 0:
+                  feedRouter.goNamed('/');
+                case 1:
+                  searchRouter.goNamed('/');
+                case 2:
+                  createRouter.goNamed('/');
+                case 3:
+                  notificationsRouter.goNamed('/');
+                case 4:
+                  profileRouter.goNamed('/');
+              }
+            },
             tabs: [
               Tab(icon: Icon(Icons.home)),
               Tab(icon: Icon(Icons.search)),

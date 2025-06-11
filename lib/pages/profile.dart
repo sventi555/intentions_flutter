@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intentions_flutter/models/follow.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
+import 'package:intentions_flutter/pages/intention.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/follows.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
@@ -15,13 +16,14 @@ import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-final routerProvider = Provider((ref) {
+final profileRouterProvider = Provider((ref) {
   final user = ref.watch(authUserProvider).value;
 
   return GoRouter(
     routes: [
       GoRoute(
         path: '/',
+        name: '/',
         builder: (context, state) => MyProfile(),
         redirect: (context, state) {
           if (user == null) {
@@ -29,6 +31,14 @@ final routerProvider = Provider((ref) {
           } else {
             return null;
           }
+        },
+      ),
+      GoRoute(
+        path: '/intention/:intentionId',
+        builder: (context, state) {
+          final intentionId = state.pathParameters['intentionId']!;
+
+          return Intention(intentionId: intentionId);
         },
       ),
       GoRoute(
@@ -62,7 +72,7 @@ class ProfileTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authUserProvider);
-    final router = ref.watch(routerProvider);
+    final router = ref.watch(profileRouterProvider);
 
     if (user.isLoading) {
       return CircularProgressIndicator();
@@ -247,7 +257,9 @@ class ProfileIntentions extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        context.push('/intention/${intention.id}');
+                      },
                     ),
                 ],
               ),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:intentions_flutter/api_config.dart';
@@ -43,12 +42,14 @@ class UpdateUserBody {
 }
 
 Future<void> updateUser(Ref ref, UpdateUserBody body) async {
-  final user = await ref.read(authUserProvider.future);
-  if (user == null) {
+  final authUser = await ref.read(authUserProvider.future);
+  final user = await ref.read(userProvider(authUser?.uid ?? '').future);
+
+  if (authUser == null) {
     throw StateError('must be signed in to update user');
   }
 
-  final token = await user.getIdToken();
+  final token = await authUser.getIdToken();
 
   await http.patch(
     Uri.parse('${ApiConfig.baseUrl}/users'),
@@ -58,8 +59,9 @@ Future<void> updateUser(Ref ref, UpdateUserBody body) async {
     }),
   );
 
-  ref.invalidate(userProvider(user.uid));
-  ref.invalidate(postsProvider(user.uid));
+  ref.invalidate(userProvider(authUser.uid));
+  ref.invalidate(userSearchProvider(user.username));
+  ref.invalidate(postsProvider(authUser.uid));
   ref.invalidate(feedProvider);
 }
 
