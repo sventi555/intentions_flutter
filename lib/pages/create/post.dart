@@ -94,7 +94,9 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     if (user == null) {
       throw StateError('must be signed in to see create post page');
     }
-    final intentions = ref.watch(intentionsProvider(user.uid));
+    final intentions = ref.watch(
+      intentionsProvider(IntentionsProviderArg(userId: user.uid)),
+    );
 
     return Scaffold(
       body: Container(

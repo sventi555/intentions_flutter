@@ -1,1 +1,5 @@
 - intention sorting
+    - when making a post, invalidate that intention by count and recency
+- tab persistence
+- autofill intention when creating to most recent
+- preview image on creation (figure out UX)

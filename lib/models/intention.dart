@@ -1,11 +1,10 @@
 class IntentionUser {
   final String username;
-  final String? image;
 
-  const IntentionUser({required this.username, this.image});
+  const IntentionUser({required this.username});
 
   factory IntentionUser.fromJson(Map<String, dynamic> json) {
-    return IntentionUser(username: json['username'], image: json['image']);
+    return IntentionUser(username: json['username']);
   }
 }
 

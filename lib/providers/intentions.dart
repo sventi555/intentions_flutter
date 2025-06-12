@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:intentions_flutter/api_config.dart';
@@ -24,20 +25,75 @@ final intentionProvider = FutureProvider.family<Intention, String>((
   return Intention.fromJson(intentionId, intentionData);
 });
 
-final intentionsProvider = FutureProvider.family<List<Intention>, String>((
-  ref,
-  userId,
-) async {
-  final intentions = await firebase.db
-      .collection('intentions')
-      .where('userId', isEqualTo: userId)
-      .orderBy('createdAt')
-      .get();
+enum IntentionsSortBy { name, postCount, updatedAt }
 
-  return intentions.docs
-      .map((d) => Intention.fromJson(d.id, d.data()))
-      .toList();
-});
+enum SortDirection { normal, inverse }
+
+class IntentionsProviderArg extends Equatable {
+  final String userId;
+  final IntentionsSortBy sortBy;
+  final SortDirection sortDir;
+
+  const IntentionsProviderArg({
+    required this.userId,
+    this.sortBy = IntentionsSortBy.updatedAt,
+    this.sortDir = SortDirection.normal,
+  });
+
+  @override
+  get props => [userId, sortBy, sortDir];
+}
+
+final intentionsProvider =
+    FutureProvider.family<List<Intention>, IntentionsProviderArg>((
+      ref,
+      arg,
+    ) async {
+      var sortBy = "";
+      var desc = false;
+
+      if (arg.sortBy == IntentionsSortBy.name) {
+        sortBy = "name";
+        desc = arg.sortDir != SortDirection.normal;
+      } else if (arg.sortBy == IntentionsSortBy.updatedAt) {
+        sortBy = "updatedAt";
+        desc = arg.sortDir == SortDirection.normal;
+      } else if (arg.sortBy == IntentionsSortBy.postCount) {
+        sortBy = "postCount";
+        desc = arg.sortDir == SortDirection.normal;
+      }
+
+      var intentionsQuery = firebase.db
+          .collection('intentions')
+          .where('userId', isEqualTo: arg.userId)
+          .orderBy(sortBy, descending: desc);
+
+      // secondary sorting of name for non-name primary sorts
+      if (sortBy != 'name') {
+        intentionsQuery = intentionsQuery.orderBy('name');
+      }
+
+      final intentions = await intentionsQuery.get();
+      return intentions.docs
+          .map((d) => Intention.fromJson(d.id, d.data()))
+          .toList();
+    });
+
+void invalidateIntentions(Ref ref, String userId) {
+  for (final sortBy in IntentionsSortBy.values) {
+    for (final sortDir in SortDirection.values) {
+      ref.invalidate(
+        intentionsProvider(
+          IntentionsProviderArg(
+            userId: userId,
+            sortBy: sortBy,
+            sortDir: sortDir,
+          ),
+        ),
+      );
+    }
+  }
+}
 
 class CreateIntentionBody {
   final String name;
@@ -58,7 +114,7 @@ Future<void> createIntention(Ref ref, CreateIntentionBody body) async {
     body: jsonEncode({'name': body.name}),
   );
 
-  ref.invalidate(intentionsProvider(user.uid));
+  invalidateIntentions(ref, user.uid);
 }
 
 final createIntentionProvider = Provider((ref) {

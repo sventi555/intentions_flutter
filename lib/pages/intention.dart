@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/providers/posts.dart';
-import 'package:intentions_flutter/widgets/profile_pic.dart';
 
 class Intention extends ConsumerWidget {
   final String intentionId;
@@ -26,24 +25,12 @@ class Intention extends ConsumerWidget {
                 border: Border(bottom: BorderSide(color: Colors.black)),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ProfilePic(image: intention.user.image),
-                      SizedBox(width: 4),
-                      Text(intention.user.username),
-                    ],
-                  ),
-                  SizedBox(height: 4),
-                  Container(
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(4)),
-                      border: Border.all(color: Colors.black),
-                    ),
-                    child: Text(intention.name),
+                  Text("${intention.user.username}'s intention: "),
+                  Text(
+                    intention.name,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                 ],
               ),

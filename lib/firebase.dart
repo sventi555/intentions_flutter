@@ -36,7 +36,6 @@ class FirebaseController {
       );
 
       final host = Platform.isAndroid ? '10.0.2.2' : 'localhost';
-      print(host);
       await auth.useAuthEmulator(host, 9099);
       db.useFirestoreEmulator(host, 8080);
       await storage.useStorageEmulator(host, 9199);

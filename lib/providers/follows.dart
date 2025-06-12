@@ -38,6 +38,7 @@ final followsToMeProvider = FutureProvider<List<Follow>>((ref) async {
 
   final follows = await firebase.db
       .collection('follows/${user.uid}/from')
+      .orderBy('createdAt', descending: true)
       .get();
 
   return follows.docs

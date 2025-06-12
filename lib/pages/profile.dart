@@ -216,14 +216,33 @@ class ProfilePosts extends ConsumerWidget {
   }
 }
 
-class ProfileIntentions extends ConsumerWidget {
+class ProfileIntentions extends ConsumerStatefulWidget {
   final String userId;
 
   const ProfileIntentions({super.key, required this.userId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final intentions = ref.watch(intentionsProvider(userId));
+  ConsumerState<ProfileIntentions> createState() {
+    return _ProfileIntentionsState();
+  }
+}
+
+class _ProfileIntentionsState extends ConsumerState<ProfileIntentions> {
+  final defaultSort = IntentionsSortBy.updatedAt;
+  IntentionsSortBy sortBy = IntentionsSortBy.updatedAt;
+  SortDirection sortDir = SortDirection.normal;
+
+  @override
+  Widget build(BuildContext context) {
+    final intentions = ref.watch(
+      intentionsProvider(
+        IntentionsProviderArg(
+          userId: widget.userId,
+          sortBy: sortBy,
+          sortDir: sortDir,
+        ),
+      ),
+    );
 
     return Container(
       padding: EdgeInsets.all(8),
@@ -233,14 +252,44 @@ class ProfileIntentions extends ConsumerWidget {
           Row(
             children: [
               DropdownMenu(
+                initialSelection: defaultSort,
+                onSelected: (sort) {
+                  setState(() {
+                    if (sort != null) {
+                      sortBy = sort;
+                    }
+                  });
+                },
                 requestFocusOnTap: false,
                 dropdownMenuEntries: [
-                  DropdownMenuEntry(value: "name", label: "Name"),
-                  DropdownMenuEntry(value: "active", label: "Recently active"),
-                  DropdownMenuEntry(value: "count", label: "Total posts"),
+                  DropdownMenuEntry(
+                    value: IntentionsSortBy.updatedAt,
+                    label: "Recently active",
+                  ),
+                  DropdownMenuEntry(
+                    value: IntentionsSortBy.name,
+                    label: "Name",
+                  ),
+                  DropdownMenuEntry(
+                    value: IntentionsSortBy.postCount,
+                    label: "Total posts",
+                  ),
                 ],
               ),
-              IconButton(icon: Icon(Icons.keyboard_arrow_up), onPressed: () {}),
+              IconButton(
+                icon: Icon(
+                  sortDir == SortDirection.normal
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                ),
+                onPressed: () {
+                  setState(() {
+                    sortDir = sortDir == SortDirection.normal
+                        ? SortDirection.inverse
+                        : SortDirection.normal;
+                  });
+                },
+              ),
             ],
           ),
           Expanded(
@@ -250,13 +299,17 @@ class ProfileIntentions extends ConsumerWidget {
                   for (var intention in value)
                     ListTile(
                       title: Text(intention.name),
-                      subtitle: Text(
-                        timeago.format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                            intention.createdAt,
-                          ),
-                        ),
-                      ),
+                      subtitle: sortBy != IntentionsSortBy.name
+                          ? Text(
+                              sortBy == IntentionsSortBy.updatedAt
+                                  ? timeago.format(
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                        intention.createdAt,
+                                      ),
+                                    )
+                                  : '${intention.postCount} posts',
+                            )
+                          : null,
                       onTap: () {
                         context.push('/intention/${intention.id}');
                       },
