@@ -16,7 +16,16 @@ class Post extends ConsumerWidget {
     final alreadyOnProfile =
         GoRouter.of(context).state.uri.toString() == userProfileUri;
     if (!alreadyOnProfile) {
-      context.push('/user/${post.userId}');
+      context.push(userProfileUri);
+    }
+  }
+
+  void goToIntention(BuildContext context) {
+    final intentionUri = '/intention/${post.intentionId}';
+    final alreadyOnIntention =
+        GoRouter.of(context).state.uri.toString() == intentionUri;
+    if (!alreadyOnIntention) {
+      context.push(intentionUri);
     }
   }
 
@@ -62,7 +71,7 @@ class Post extends ConsumerWidget {
               SizedBox(height: 8),
               GestureDetector(
                 onTap: () {
-                  context.push('/intention/${post.intentionId}');
+                  goToIntention(context);
                 },
                 child: Chip(
                   label: Text(post.intention.name),
