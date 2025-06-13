@@ -109,6 +109,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
               children: [
                 intentions.when(
                   data: (intentions) => DropdownMenu<String>(
+                    enableFilter: true,
                     enabled: intentions.isNotEmpty,
                     initialSelection: intentions.isNotEmpty
                         ? intentions[0].id
@@ -118,14 +119,18 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                         selectedIntentionId = val;
                       });
                     },
-                    dropdownMenuEntries: intentions
-                        .map(
-                          (intention) => DropdownMenuEntry<String>(
-                            label: intention.name,
-                            value: intention.id,
-                          ),
-                        )
-                        .toList(),
+                    dropdownMenuEntries: intentions.isNotEmpty
+                        ? intentions
+                              .map(
+                                (intention) => DropdownMenuEntry(
+                                  label: intention.name,
+                                  value: intention.id,
+                                ),
+                              )
+                              .toList()
+                        // If the dropdown has no entries, there's a weird visual bug.
+                        // Adding a dummy entry since the button will be disabled anyway.
+                        : [DropdownMenuEntry(label: '', value: '')],
                     label: Text("Select an intention"),
                   ),
                   error: (_, _) => Text('error loading intentions'),
