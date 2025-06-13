@@ -1,3 +1,1 @@
-- tab persistence
-- autofill intention when creating to most recent
 - preview image on creation (figure out UX)

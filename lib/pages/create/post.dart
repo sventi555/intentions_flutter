@@ -107,25 +107,31 @@ class _CreatePostState extends ConsumerState<CreatePost> {
           children: [
             Row(
               children: [
-                DropdownMenu<String>(
-                  onSelected: (val) {
-                    setState(() {
-                      selectedIntentionId = val;
-                    });
-                  },
-                  dropdownMenuEntries: intentions.when(
-                    data: (val) => [
-                      for (var intention in val)
-                        DropdownMenuEntry<String>(
-                          label: intention.name,
-                          value: intention.id,
-                        ),
-                    ],
-                    error: (_, _) => [],
-                    loading: () => [],
+                intentions.when(
+                  data: (intentions) => DropdownMenu<String>(
+                    enabled: intentions.isNotEmpty,
+                    initialSelection: intentions.isNotEmpty
+                        ? intentions[0].id
+                        : null,
+                    onSelected: (val) {
+                      setState(() {
+                        selectedIntentionId = val;
+                      });
+                    },
+                    dropdownMenuEntries: intentions
+                        .map(
+                          (intention) => DropdownMenuEntry<String>(
+                            label: intention.name,
+                            value: intention.id,
+                          ),
+                        )
+                        .toList(),
+                    label: Text("Select an intention"),
                   ),
-                  label: Text("Select an intention"),
+                  error: (_, _) => Text('error loading intentions'),
+                  loading: () => CircularProgressIndicator(),
                 ),
+
                 SizedBox(width: 4),
                 IconButton(
                   icon: Icon(Icons.add),
