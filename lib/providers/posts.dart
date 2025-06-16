@@ -86,6 +86,7 @@ Future<void> createPost(Ref ref, CreatePostBody body) async {
 
   ref.invalidate(feedProvider);
   ref.invalidate(postsProvider(user.uid));
+  ref.invalidate(intentionPostsProvider(body.intentionId));
   invalidateIntentions(ref, user.uid);
 }
 

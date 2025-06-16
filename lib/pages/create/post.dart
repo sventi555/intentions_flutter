@@ -8,7 +8,6 @@ import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/pages/create/intention.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
-import 'package:intentions_flutter/providers/image.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/utils/image.dart';
@@ -94,11 +93,12 @@ class _CreatePostState extends ConsumerState<CreatePost> {
 
   Future<void> pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-    setState(() {
-      this.image = image;
-    });
 
     if (image != null) {
+      setState(() {
+        this.image = image;
+      });
+
       final imageBytes = await image.readAsBytes();
       setState(() {
         this.imageBytes = imageBytes;
