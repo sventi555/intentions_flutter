@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:intentions_flutter/api_config.dart';
 import 'package:intentions_flutter/firebase.dart';
+import 'package:intentions_flutter/widgets/password_input.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -86,13 +87,7 @@ class _SignUpState extends State<SignUp> {
                     label: Text("email"),
                   ),
                 ),
-                TextField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    label: Text("password"),
-                  ),
-                ),
+                PasswordInput(controller: passwordController),
               ],
             ),
             FilledButton(onPressed: onSubmit, child: Text("Sign up")),
