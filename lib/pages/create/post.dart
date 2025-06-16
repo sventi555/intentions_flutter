@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/pages/create/intention.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
+import 'package:intentions_flutter/providers/image.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/utils/image.dart';
@@ -87,6 +90,21 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   TextEditingController descriptionController = TextEditingController();
   String? selectedIntentionId;
   XFile? image;
+  Uint8List? imageBytes;
+
+  Future<void> pickImage() async {
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      this.image = image;
+    });
+
+    if (image != null) {
+      final imageBytes = await image.readAsBytes();
+      setState(() {
+        this.imageBytes = imageBytes;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +115,8 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     final intentions = ref.watch(
       intentionsProvider(IntentionsProviderArg(userId: user.uid)),
     );
+
+    final imageBytes = this.imageBytes;
 
     return Scaffold(
       body: Container(
@@ -146,29 +166,25 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                 ),
               ],
             ),
-            GestureDetector(
-              onTap: () async {
-                final ImagePicker picker = ImagePicker();
-                picker.pickImage(source: ImageSource.gallery).then((img) {
-                  setState(() {
-                    image = img;
-                  });
-                });
-              },
-              child: Container(
-                padding: EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.add_photo_alternate, size: 64),
-                    Text("Select an image"),
-                  ],
-                ),
-              ),
-            ),
+            if (imageBytes != null) Image.memory(imageBytes, fit: BoxFit.fill),
+            image == null
+                ? GestureDetector(
+                    onTap: pickImage,
+                    child: Container(
+                      padding: EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(Icons.add_photo_alternate, size: 64),
+                          Text("Select an image"),
+                        ],
+                      ),
+                    ),
+                  )
+                : TextButton(onPressed: pickImage, child: Text("Change image")),
             TextField(
               controller: descriptionController,
               maxLines: null,
@@ -197,12 +213,18 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                   child: FilledButton(
                     child: Text("Post"),
                     onPressed: () async {
+                      final image = this.image;
+
                       final createPost = ref.read(createPostProvider);
-                      final img = image;
                       await createPost(
                         CreatePostBody(
-                          intentionId: selectedIntentionId ?? '',
-                          image: img != null ? await toImageDataUrl(img) : null,
+                          intentionId:
+                              selectedIntentionId ??
+                              intentions.value?[0].id ??
+                              '',
+                          image: image != null
+                              ? await toImageDataUrl(image)
+                              : null,
                           description: descriptionController.text,
                         ),
                       );

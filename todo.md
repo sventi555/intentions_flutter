@@ -1,1 +1,2 @@
-- preview image on creation (figure out UX)
+- make sure firebase and api are up to date
+- figure out how to make a production deployment to send to your phone
