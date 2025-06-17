@@ -83,6 +83,23 @@ final intentionsProvider =
           .toList();
     });
 
+final emptyIntentionsProvider = Provider.family<bool?, String?>((ref, userId) {
+  final intentionsEmpty = ref.watch(
+    intentionsProvider(IntentionsProviderArg(userId: userId)).select((
+      intentions,
+    ) {
+      final val = intentions.when(
+        data: (vals) => vals.isEmpty,
+        loading: () => null,
+        error: (_, _) => null,
+      );
+      return val;
+    }),
+  );
+
+  return intentionsEmpty;
+});
+
 void invalidateIntentions(Ref ref, String userId) {
   for (final sortBy in IntentionsSortBy.values) {
     for (final sortDir in SortDirection.values) {

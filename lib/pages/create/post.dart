@@ -14,18 +14,7 @@ import 'package:intentions_flutter/utils/image.dart';
 
 final createRouterProvider = Provider((ref) {
   final user = ref.watch(authUserProvider).value;
-  final intentionsEmpty = ref.watch(
-    intentionsProvider(IntentionsProviderArg(userId: user?.uid)).select((
-      intentions,
-    ) {
-      final val = intentions.when(
-        data: (vals) => vals.isEmpty,
-        loading: () => null,
-        error: (_, _) => null,
-      );
-      return val;
-    }),
-  );
+  final intentionsEmpty = ref.watch(emptyIntentionsProvider(user?.uid));
 
   return GoRouter(
     routes: [
