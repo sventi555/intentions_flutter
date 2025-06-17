@@ -116,6 +116,8 @@ void invalidateIntentions(Ref ref, String userId) {
   }
 }
 
+class DuplicateIntentionException {}
+
 class CreateIntentionBody {
   final String name;
 
@@ -129,11 +131,15 @@ Future<void> createIntention(Ref ref, CreateIntentionBody body) async {
   }
   final token = await user.getIdToken();
 
-  await http.post(
+  final res = await http.post(
     Uri.parse('${ApiConfig.baseUrl}/intentions'),
     headers: {'Authorization': token ?? '', 'Content-Type': 'application/json'},
     body: jsonEncode({'name': body.name}),
   );
+
+  if (res.statusCode == 409) {
+    throw DuplicateIntentionException();
+  }
 
   invalidateIntentions(ref, user.uid);
 }

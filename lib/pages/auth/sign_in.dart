@@ -30,7 +30,20 @@ class _SignInState extends State<SignIn> {
     super.dispose();
   }
 
+  void resetErrors() {
+    setState(() {
+      emailErr = null;
+      passwordErr = null;
+      formErr = null;
+    });
+  }
+
   void onSubmit() async {
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) {
+      return;
+    }
+
     try {
       await firebase.auth.signInWithEmailAndPassword(
         email: emailController.text,
@@ -99,14 +112,10 @@ class _SignInState extends State<SignIn> {
                 ),
               FilledButton(
                 onPressed: () {
-                  setState(() {
-                    emailErr = null;
-                    passwordErr = null;
-                    formErr = null;
-                  });
+                  resetErrors();
 
                   // need to wait for forcedErrorText to clear
-                  // otherwise validate will report "false" for some reason...
+                  // otherwise validate will report "false"
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     onSubmit();
                   });

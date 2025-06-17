@@ -12,6 +12,27 @@ class CreateIntention extends ConsumerStatefulWidget {
 
 class CreateIntentionState extends ConsumerState {
   final nameController = TextEditingController();
+  String? intentionErr;
+  bool isValid = false;
+
+  Future<void> onSubmit(BuildContext context) async {
+    final createIntention = ref.read(createIntentionProvider);
+    try {
+      await createIntention(CreateIntentionBody(name: nameController.text));
+    } on DuplicateIntentionException catch (_) {
+      setState(() {
+        intentionErr = 'Intention with same name already exists';
+      });
+      return;
+    }
+
+    if (!context.mounted) return;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +43,15 @@ class CreateIntentionState extends ConsumerState {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 8,
           children: [
-            TextField(
+            Text("Create an intention"),
+            TextFormField(
+              forceErrorText: intentionErr,
               controller: nameController,
+              onChanged: (val) {
+                setState(() {
+                  isValid = val.isNotEmpty;
+                });
+              },
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hint: Text("e.g. touch grass"),
@@ -46,19 +74,11 @@ class CreateIntentionState extends ConsumerState {
                   ),
                 Expanded(
                   child: FilledButton(
-                    onPressed: () async {
-                      final createIntention = ref.read(createIntentionProvider);
-                      await createIntention(
-                        CreateIntentionBody(name: nameController.text),
-                      );
-
-                      if (!context.mounted) return;
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('/');
-                      }
-                    },
+                    onPressed: isValid
+                        ? () {
+                            onSubmit(context);
+                          }
+                        : null,
                     child: Text("Create"),
                   ),
                 ),

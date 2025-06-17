@@ -97,6 +97,8 @@ class _CreatePostState extends ConsumerState<CreatePost> {
   XFile? image;
   Uint8List? imageBytes;
 
+  String? errMessage;
+
   Future<void> pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
 
@@ -201,6 +203,11 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                 alignLabelWithHint: true,
               ),
             ),
+            if (errMessage != null)
+              Text(
+                errMessage!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
             Row(
               children: [
                 Expanded(
@@ -221,19 +228,35 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                     onPressed: () async {
                       final image = this.image;
 
+                      final intentionId =
+                          selectedIntentionId ?? intentions.value?[0].id;
+
+                      // Should redirect to create intention page, but just in case...
+                      if (intentionId == null) {
+                        setState(() {
+                          errMessage = 'Must select an intention';
+                        });
+                        return;
+                      }
+
+                      if (image == null && descriptionController.text.isEmpty) {
+                        setState(() {
+                          errMessage = 'Must include image or description';
+                        });
+                        return;
+                      }
+
                       final createPost = ref.read(createPostProvider);
                       await createPost(
                         CreatePostBody(
-                          intentionId:
-                              selectedIntentionId ??
-                              intentions.value?[0].id ??
-                              '',
+                          intentionId: intentionId,
                           image: image != null
                               ? await toImageDataUrl(image)
                               : null,
                           description: descriptionController.text,
                         ),
                       );
+
                       if (!context.mounted) return;
                       DefaultTabController.of(context).animateTo(0);
                     },

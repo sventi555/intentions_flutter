@@ -27,6 +27,15 @@ class _SignUpState extends State<SignUp> {
 
   final _formKey = GlobalKey<FormState>();
 
+  void resetErrors() {
+    setState(() {
+      usernameErr = null;
+      emailErr = null;
+      passwordErr = null;
+      formErr = null;
+    });
+  }
+
   void onSubmit() async {
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
@@ -142,15 +151,10 @@ class _SignUpState extends State<SignUp> {
                 ),
               FilledButton(
                 onPressed: () {
-                  setState(() {
-                    usernameErr = null;
-                    emailErr = null;
-                    passwordErr = null;
-                    formErr = null;
-                  });
+                  resetErrors();
 
                   // need to wait for forcedErrorText to clear
-                  // otherwise validate will report "false" for some reason...
+                  // otherwise validate will report "false"
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     onSubmit();
                   });
