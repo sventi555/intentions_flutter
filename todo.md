@@ -1,5 +1,5 @@
+- profile content when not followed private user
 - empty follow page content
-- empty profile page content (posts and intention lists)
 - link to user from follow list
 - create intention header (or some other way to give more context to user)
 

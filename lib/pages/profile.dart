@@ -182,8 +182,18 @@ class Profile extends ConsumerWidget {
                   ),
                   body: TabBarView(
                     children: [
-                      ProfilePosts(userId: userId),
-                      ProfileIntentions(userId: userId),
+                      ProfilePosts(
+                        userId: userId,
+                        onClickCreatePost: () {
+                          DefaultTabController.of(context).animateTo(2);
+                        },
+                      ),
+                      ProfileIntentions(
+                        userId: userId,
+                        onClickCreateIntention: () {
+                          DefaultTabController.of(context).animateTo(2);
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -200,16 +210,37 @@ class Profile extends ConsumerWidget {
 
 class ProfilePosts extends ConsumerWidget {
   final String userId;
+  final Function() onClickCreatePost;
 
-  const ProfilePosts({super.key, required this.userId});
+  const ProfilePosts({
+    super.key,
+    required this.userId,
+    required this.onClickCreatePost,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authUser = ref.watch(authUserProvider);
     final posts = ref.watch(postsProvider(userId));
 
     return posts.when(
-      data: (val) =>
-          ListView(children: [for (var post in val) Post(post: post)]),
+      data: (value) {
+        if (value.isEmpty) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("No posts yet..."),
+              if (authUser.value?.uid == userId)
+                TextButton(
+                  onPressed: onClickCreatePost,
+                  child: Text("create a post!"),
+                ),
+            ],
+          );
+        }
+
+        return ListView(children: [for (var post in value) Post(post: post)]);
+      },
       error: (_, _) => Text('error fetching posts'),
       loading: () => CircularProgressIndicator(),
     );
@@ -218,8 +249,13 @@ class ProfilePosts extends ConsumerWidget {
 
 class ProfileIntentions extends ConsumerStatefulWidget {
   final String userId;
+  final Function() onClickCreateIntention;
 
-  const ProfileIntentions({super.key, required this.userId});
+  const ProfileIntentions({
+    super.key,
+    required this.userId,
+    required this.onClickCreateIntention,
+  });
 
   @override
   ConsumerState<ProfileIntentions> createState() {
@@ -234,6 +270,8 @@ class _ProfileIntentionsState extends ConsumerState<ProfileIntentions> {
 
   @override
   Widget build(BuildContext context) {
+    final authUser = ref.watch(authUserProvider);
+
     final intentions = ref.watch(
       intentionsProvider(
         IntentionsProviderArg(
@@ -294,28 +332,44 @@ class _ProfileIntentionsState extends ConsumerState<ProfileIntentions> {
           ),
           Expanded(
             child: intentions.when(
-              data: (value) => ListView(
-                children: [
-                  for (var intention in value)
-                    ListTile(
-                      title: Text(intention.name),
-                      subtitle: sortBy != IntentionsSortBy.name
-                          ? Text(
-                              sortBy == IntentionsSortBy.updatedAt
-                                  ? timeago.format(
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                        intention.createdAt,
-                                      ),
-                                    )
-                                  : '${intention.postCount} posts',
-                            )
-                          : null,
-                      onTap: () {
-                        context.push('/intention/${intention.id}');
-                      },
-                    ),
-                ],
-              ),
+              data: (value) {
+                if (value.isEmpty) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("No intentions yet..."),
+                      if (authUser.value?.uid == widget.userId)
+                        TextButton(
+                          onPressed: widget.onClickCreateIntention,
+                          child: Text("create an intention!"),
+                        ),
+                    ],
+                  );
+                }
+
+                return ListView(
+                  children: [
+                    for (var intention in value)
+                      ListTile(
+                        title: Text(intention.name),
+                        subtitle: sortBy != IntentionsSortBy.name
+                            ? Text(
+                                sortBy == IntentionsSortBy.updatedAt
+                                    ? timeago.format(
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                          intention.createdAt,
+                                        ),
+                                      )
+                                    : '${intention.postCount} posts',
+                              )
+                            : null,
+                        onTap: () {
+                          context.push('/intention/${intention.id}');
+                        },
+                      ),
+                  ],
+                );
+              },
               error: (_, _) => Text('error fetching intentions'),
               loading: () => CircularProgressIndicator(),
             ),
