@@ -32,15 +32,18 @@ class CreateIntentionState extends ConsumerState {
             Row(
               spacing: 8,
               children: [
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () {
-                      context.pop();
-                    },
-                    style: FilledButton.styleFrom(backgroundColor: Colors.grey),
-                    child: Text("Cancel"),
+                if (context.canPop())
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                      ),
+                      child: Text("Cancel"),
+                    ),
                   ),
-                ),
                 Expanded(
                   child: FilledButton(
                     onPressed: () async {
@@ -50,7 +53,11 @@ class CreateIntentionState extends ConsumerState {
                       );
 
                       if (!context.mounted) return;
-                      context.pop();
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/');
+                      }
                     },
                     child: Text("Create"),
                   ),

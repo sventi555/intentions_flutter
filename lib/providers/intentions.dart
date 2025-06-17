@@ -30,12 +30,12 @@ enum IntentionsSortBy { name, postCount, updatedAt }
 enum SortDirection { normal, inverse }
 
 class IntentionsProviderArg extends Equatable {
-  final String userId;
+  final String? userId;
   final IntentionsSortBy sortBy;
   final SortDirection sortDir;
 
   const IntentionsProviderArg({
-    required this.userId,
+    this.userId,
     this.sortBy = IntentionsSortBy.updatedAt,
     this.sortDir = SortDirection.normal,
   });
@@ -49,6 +49,10 @@ final intentionsProvider =
       ref,
       arg,
     ) async {
+      if (arg.userId == null) {
+        return [];
+      }
+
       var sortBy = "";
       var desc = false;
 
