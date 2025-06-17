@@ -4,5 +4,6 @@
 - link to user from follow list
 
 - figure out how to make a production deployment to send to your phone
+- add linting and best practices (disposal stuff probably)
 
-- better loading content
+- better loading content (or just remove some spinners)
