@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -21,12 +20,24 @@ class _SignUpState extends State<SignUp> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  String? usernameErr;
+  String? emailErr;
+  String? passwordErr;
+  String? formErr;
+
+  final _formKey = GlobalKey<FormState>();
+
   void onSubmit() async {
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) {
+      return;
+    }
+
     final email = emailController.text;
     final password = passwordController.text;
 
     try {
-      var res = await http.post(
+      final res = await http.post(
         Uri.parse('${ApiConfig.baseUrl}/users'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -37,8 +48,23 @@ class _SignUpState extends State<SignUp> {
         }),
       );
 
-      if (!(res.statusCode >= 200 && res.statusCode < 300)) {
-        print(res.statusCode);
+      final code = res.statusCode;
+      final ok = code >= 200 && code < 300;
+      if (!(ok)) {
+        setState(() {
+          if (code == 400 && res.body == 'invalid email') {
+            emailErr = 'Enter a valid email address';
+          } else if (code == 400 && res.body == 'invalid password') {
+            passwordErr = 'Password must be at least 8 characters long';
+          } else if (code == 409 && res.body == 'username already taken') {
+            usernameErr = 'Username already taken';
+          } else if (code == 409 && res.body == 'email already taken') {
+            emailErr = 'Email already taken';
+          } else {
+            formErr = 'Something went wrong, please try again';
+          }
+        });
+
         return;
       }
 
@@ -46,10 +72,10 @@ class _SignUpState extends State<SignUp> {
         email: email,
         password: password,
       );
-    } on FirebaseAuthException catch (e) {
-      print(e);
     } catch (e) {
-      print(e);
+      setState(() {
+        formErr = 'Something went wrong, please try again';
+      });
     }
   }
 
@@ -58,51 +84,92 @@ class _SignUpState extends State<SignUp> {
     return Scaffold(
       body: Container(
         padding: EdgeInsets.all(8),
-        child: Column(
-          spacing: 16,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Column(
-              children: [
-                Text("Intentions", style: TextStyle(fontSize: 32)),
-                Text("act intentionally", style: TextStyle(fontSize: 16)),
-              ],
-            ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            spacing: 16,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Column(
+                children: [
+                  Text("Intentions", style: TextStyle(fontSize: 32)),
+                  Text("act intentionally", style: TextStyle(fontSize: 16)),
+                ],
+              ),
 
-            Column(
-              spacing: 4,
-              children: [
-                TextField(
-                  controller: usernameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    label: Text("username"),
+              Column(
+                spacing: 4,
+                children: [
+                  TextFormField(
+                    forceErrorText: usernameErr,
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      label: Text("username"),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return "Enter a username";
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    label: Text("email"),
+                  TextFormField(
+                    forceErrorText: emailErr,
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      label: Text("email"),
+                    ),
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return "Enter an email";
+                      }
+                      return null;
+                    },
                   ),
+                  PasswordInput(
+                    controller: passwordController,
+                    forceErrorText: passwordErr,
+                  ),
+                ],
+              ),
+              if (formErr != null)
+                Text(
+                  formErr!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
-                PasswordInput(controller: passwordController),
-              ],
-            ),
-            FilledButton(onPressed: onSubmit, child: Text("Sign up")),
-            Column(
-              children: [
-                Text("Already a user?"),
-                TextButton(
-                  child: Text("Sign in"),
-                  onPressed: () {
-                    context.go('/signin');
-                  },
-                ),
-              ],
-            ),
-          ],
+              FilledButton(
+                onPressed: () {
+                  setState(() {
+                    usernameErr = null;
+                    emailErr = null;
+                    passwordErr = null;
+                    formErr = null;
+                  });
+
+                  // need to wait for forcedErrorText to clear
+                  // otherwise validate will report "false" for some reason...
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    onSubmit();
+                  });
+                },
+                child: Text("Sign up"),
+              ),
+              Column(
+                children: [
+                  Text("Already a user?"),
+                  TextButton(
+                    child: Text("Sign in"),
+                    onPressed: () {
+                      context.go('/signin');
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
