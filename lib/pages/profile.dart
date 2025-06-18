@@ -118,6 +118,7 @@ class Profile extends ConsumerWidget {
           ? 'pending'
           : 'unfollow';
     }
+
     return profileUser.when(
       data: (user) => Scaffold(
         body: Column(
@@ -182,17 +183,23 @@ class Profile extends ConsumerWidget {
                   ),
                   body: TabBarView(
                     children: [
-                      ProfilePosts(
+                      MaybePrivateWrapper(
                         userId: userId,
-                        onClickCreatePost: () {
-                          DefaultTabController.of(context).animateTo(2);
-                        },
+                        child: ProfilePosts(
+                          userId: userId,
+                          onClickCreatePost: () {
+                            DefaultTabController.of(context).animateTo(2);
+                          },
+                        ),
                       ),
-                      ProfileIntentions(
+                      MaybePrivateWrapper(
                         userId: userId,
-                        onClickCreateIntention: () {
-                          DefaultTabController.of(context).animateTo(2);
-                        },
+                        child: ProfileIntentions(
+                          userId: userId,
+                          onClickCreateIntention: () {
+                            DefaultTabController.of(context).animateTo(2);
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -376,6 +383,47 @@ class _ProfileIntentionsState extends ConsumerState<ProfileIntentions> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class MaybePrivateWrapper extends ConsumerWidget {
+  final String userId;
+  final Widget child;
+
+  const MaybePrivateWrapper({
+    super.key,
+    required this.userId,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authUser = ref.watch(authUserProvider);
+    final profileUser = ref.watch(userProvider(userId));
+    final follow = ref.watch(followFromMeProvider(userId));
+    final isSelf = userId == authUser.value?.uid;
+
+    final isPrivate = profileUser.value?.isPrivate ?? true;
+    final allowedToView =
+        isSelf || !(isPrivate) || follow.value?.status == FollowStatus.accepted;
+
+    return follow.when(
+      data: (follow) => authUser.when(
+        data: (authUser) {
+          if (allowedToView) {
+            return child;
+          }
+          return Container(
+            alignment: Alignment.center,
+            child: Text("This user is private"),
+          );
+        },
+        error: (_, _) => Text("error loading auth user"),
+        loading: () => Container(),
+      ),
+      error: (_, _) => Text("error loading follow"),
+      loading: () => Container(),
     );
   }
 }
