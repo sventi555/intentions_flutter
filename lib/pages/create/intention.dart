@@ -40,7 +40,8 @@ class CreateIntentionState extends ConsumerState {
       body: Container(
         padding: EdgeInsets.all(8),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           spacing: 8,
           children: [
             Text("Create an intention"),
