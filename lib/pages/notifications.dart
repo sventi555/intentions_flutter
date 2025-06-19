@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -87,50 +88,98 @@ class Notifications extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Follow> follows = ref.watch(followsToMeProvider).value ?? [];
-    final respondToFollow = ref.read(respondToFollowProvider);
+    final follows = ref.watch(followsToMeProvider);
 
     return Scaffold(
-      body: ListView(
-        children: [
-          for (final follow in follows)
-            ListTile(
-              title: Text(
-                follow.status == FollowStatus.pending
-                    ? "${follow.fromUser.username} requested to follow you"
-                    : '${follow.fromUser.username} followed you',
+      body: follows.when(
+        data: (follows) {
+          if (follows.isEmpty) {
+            return Container(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("No follows yet..."),
+                  Text("Share your username with a friend!"),
+                ],
               ),
-              leading: ProfilePic(image: follow.fromUser.image),
-              trailing: follow.status == FollowStatus.pending
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.check),
-                          onPressed: () {
-                            respondToFollow(
-                              follow.fromUser.id,
-                              RespondToFollowBody(action: RespondAction.accept),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.close),
-                          onPressed: () {
-                            respondToFollow(
-                              follow.fromUser.id,
-                              RespondToFollowBody(
-                                action: RespondAction.decline,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    )
-                  : null,
-            ),
-        ],
+            );
+          }
+
+          return ListView(
+            children: [
+              for (final follow in follows)
+                FollowNotificationTile(follow: follow),
+            ],
+          );
+        },
+        error: (_, _) => Text("error loading follows"),
+        loading: () => Container(),
       ),
+    );
+  }
+}
+
+class FollowNotificationTile extends ConsumerWidget {
+  final Follow follow;
+
+  const FollowNotificationTile({super.key, required this.follow});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final respondToFollow = ref.read(respondToFollowProvider);
+
+    return ListTile(
+      title: RichText(
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style,
+          children: [
+            TextSpan(
+              text: follow.fromUser.username,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  context.push('/user/${follow.fromUser.id}');
+                },
+            ),
+            TextSpan(
+              text: follow.status == FollowStatus.pending
+                  ? ' requested to follow you'
+                  : ' followed you',
+            ),
+          ],
+        ),
+      ),
+      leading: GestureDetector(
+        onTap: () {
+          context.push('/user/${follow.fromUser.id}');
+        },
+        child: ProfilePic(image: follow.fromUser.image),
+      ),
+      trailing: follow.status == FollowStatus.pending
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.check),
+                  onPressed: () {
+                    respondToFollow(
+                      follow.fromUser.id,
+                      RespondToFollowBody(action: RespondAction.accept),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () {
+                    respondToFollow(
+                      follow.fromUser.id,
+                      RespondToFollowBody(action: RespondAction.decline),
+                    );
+                  },
+                ),
+              ],
+            )
+          : null,
     );
   }
 }

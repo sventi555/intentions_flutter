@@ -26,7 +26,7 @@ final feedProvider = FutureProvider<List<Post>>((ref) async {
   final user = await ref.watch(authUserProvider.future);
 
   if (user == null) {
-    throw StateError('must be signed in to fetch feed');
+    return [];
   }
 
   final feed = await firebase.db

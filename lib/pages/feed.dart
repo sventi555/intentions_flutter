@@ -131,7 +131,7 @@ class Feed extends ConsumerWidget {
               );
             },
             error: (_, _) => Text('error fetching feed'),
-            loading: () => CircularProgressIndicator(),
+            loading: () => Container(),
           ),
         ],
       ),
