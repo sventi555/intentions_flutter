@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/models/follow.dart';
+import 'package:intentions_flutter/models/notification.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/pages/intention.dart';
 import 'package:intentions_flutter/pages/profile.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/follows.dart';
+import 'package:intentions_flutter/providers/notifications.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 
 final notificationsRouterProvider = Provider((ref) {
@@ -88,12 +90,12 @@ class Notifications extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final follows = ref.watch(followsToMeProvider);
+    final notifications = ref.watch(notificationsProvider);
 
     return Scaffold(
-      body: follows.when(
-        data: (follows) {
-          if (follows.isEmpty) {
+      body: notifications.when(
+        data: (notifications) {
+          if (notifications.isEmpty) {
             return Container(
               alignment: Alignment.center,
               child: Column(
@@ -107,10 +109,12 @@ class Notifications extends ConsumerWidget {
           }
 
           return ListView(
-            children: [
-              for (final follow in follows)
-                FollowNotificationTile(follow: follow),
-            ],
+            children: notifications.map((notification) {
+              if (notification is FollowNotification) {
+                return FollowNotificationTile(follow: notification);
+              }
+              throw Exception('encountered unknown notification');
+            }).toList(),
           );
         },
         error: (_, _) => Text("error loading follows"),
@@ -121,13 +125,24 @@ class Notifications extends ConsumerWidget {
 }
 
 class FollowNotificationTile extends ConsumerWidget {
-  final Follow follow;
+  final FollowNotification follow;
 
   const FollowNotificationTile({super.key, required this.follow});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final respondToFollow = ref.read(respondToFollowProvider);
+    final authUser = ref.watch(authUserProvider).value;
+    if (authUser == null) {
+      throw StateError('must be signed in to view notifications');
+    }
+
+    final followRecipient = follow.toUser.id == authUser.uid;
+    if (!followRecipient && follow.status != FollowStatus.accepted) {
+      throw Exception(
+        'should only get notifications as sender when request is accepted',
+      );
+    }
 
     return ListTile(
       title: RichText(
@@ -141,11 +156,13 @@ class FollowNotificationTile extends ConsumerWidget {
                   context.push('/user/${follow.fromUser.id}');
                 },
             ),
-            TextSpan(
-              text: follow.status == FollowStatus.pending
-                  ? ' requested to follow you'
-                  : ' followed you',
-            ),
+            followRecipient
+                ? TextSpan(
+                    text: follow.status == FollowStatus.pending
+                        ? ' requested to follow you'
+                        : ' followed you',
+                  )
+                : TextSpan(text: ' accepted your follow request'),
           ],
         ),
       ),

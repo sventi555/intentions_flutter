@@ -6,6 +6,7 @@ import 'package:intentions_flutter/api_config.dart';
 import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/models/follow.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
+import 'package:intentions_flutter/providers/notifications.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 
 final followFromMeProvider = FutureProvider.family<Follow?, String>((
@@ -28,22 +29,6 @@ final followFromMeProvider = FutureProvider.family<Follow?, String>((
   }
 
   return Follow.fromJson(authUser.uid, followData);
-});
-
-final followsToMeProvider = FutureProvider<List<Follow>>((ref) async {
-  final user = await ref.watch(authUserProvider.future);
-  if (user == null) {
-    throw StateError('must be signed in to get follows to self');
-  }
-
-  final follows = await firebase.db
-      .collection('follows/${user.uid}/from')
-      .orderBy('createdAt', descending: true)
-      .get();
-
-  return follows.docs
-      .map((follow) => Follow.fromJson(follow.id, follow.data()))
-      .toList();
 });
 
 Future<void> followUser(Ref ref, String userId) async {
@@ -124,7 +109,7 @@ Future<void> respondToFollow(
     }),
   );
 
-  ref.invalidate(followsToMeProvider);
+  ref.invalidate(notificationsProvider);
 }
 
 final respondToFollowProvider = Provider((ref) {
