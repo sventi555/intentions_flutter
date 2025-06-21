@@ -127,144 +127,153 @@ class _CreatePostState extends ConsumerState<CreatePost> {
     final imageBytes = this.imageBytes;
 
     return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 8,
-          children: [
-            Row(
-              children: [
-                intentions.when(
-                  data: (intentions) => DropdownMenu<String>(
-                    enableFilter: true,
-                    enabled: intentions.isNotEmpty,
-                    initialSelection: intentions.isNotEmpty
-                        ? intentions[0].id
-                        : null,
-                    onSelected: (val) {
-                      setState(() {
-                        selectedIntentionId = val;
-                      });
-                    },
-                    dropdownMenuEntries: intentions.isNotEmpty
-                        ? intentions
-                              .map(
-                                (intention) => DropdownMenuEntry(
-                                  label: intention.name,
-                                  value: intention.id,
-                                ),
-                              )
-                              .toList()
-                        // If the dropdown has no entries, there's a weird visual bug.
-                        // Adding a dummy entry since the button will be disabled anyway.
-                        : [DropdownMenuEntry(label: '', value: '')],
-                    label: Text("Select an intention"),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 8,
+            children: [
+              Row(
+                children: [
+                  intentions.when(
+                    data: (intentions) => DropdownMenu<String>(
+                      enableFilter: true,
+                      enabled: intentions.isNotEmpty,
+                      initialSelection: intentions.isNotEmpty
+                          ? intentions[0].id
+                          : null,
+                      onSelected: (val) {
+                        setState(() {
+                          selectedIntentionId = val;
+                        });
+                      },
+                      dropdownMenuEntries: intentions.isNotEmpty
+                          ? intentions
+                                .map(
+                                  (intention) => DropdownMenuEntry(
+                                    label: intention.name,
+                                    value: intention.id,
+                                  ),
+                                )
+                                .toList()
+                          // If the dropdown has no entries, there's a weird visual bug.
+                          // Adding a dummy entry since the button will be disabled anyway.
+                          : [DropdownMenuEntry(label: '', value: '')],
+                      label: Text("Select an intention"),
+                    ),
+                    error: (_, _) => Text('error loading intentions'),
+                    loading: () => CircularProgressIndicator(),
                   ),
-                  error: (_, _) => Text('error loading intentions'),
-                  loading: () => CircularProgressIndicator(),
-                ),
 
-                SizedBox(width: 4),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    context.push('/intention');
-                  },
-                ),
-              ],
-            ),
-            if (imageBytes != null) Image.memory(imageBytes, fit: BoxFit.fill),
-            image == null
-                ? GestureDetector(
-                    onTap: pickImage,
-                    child: Container(
-                      padding: EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(Icons.add_photo_alternate, size: 64),
-                          Text("Select an image"),
-                        ],
-                      ),
-                    ),
-                  )
-                : TextButton(onPressed: pickImage, child: Text("Change image")),
-            TextField(
-              controller: descriptionController,
-              maxLines: null,
-              minLines: 3,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: "description",
-                alignLabelWithHint: true,
-              ),
-            ),
-            if (errMessage != null)
-              Text(
-                errMessage!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                    ),
-                    child: Text("Discard"),
+                  SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(Icons.add),
                     onPressed: () {
-                      DefaultTabController.of(context).animateTo(0);
+                      context.push('/intention');
                     },
                   ),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: FilledButton(
-                    child: Text("Post"),
-                    onPressed: () async {
-                      final image = this.image;
-
-                      final intentionId =
-                          selectedIntentionId ?? intentions.value?[0].id;
-
-                      // Should redirect to create intention page, but just in case...
-                      if (intentionId == null) {
-                        setState(() {
-                          errMessage = 'Must select an intention';
-                        });
-                        return;
-                      }
-
-                      if (image == null && descriptionController.text.isEmpty) {
-                        setState(() {
-                          errMessage = 'Must include image or description';
-                        });
-                        return;
-                      }
-
-                      final createPost = ref.read(createPostProvider);
-                      await createPost(
-                        CreatePostBody(
-                          intentionId: intentionId,
-                          image: image != null
-                              ? await toImageDataUrl(image)
-                              : null,
-                          description: descriptionController.text,
+                ],
+              ),
+              if (imageBytes != null)
+                Image.memory(imageBytes, fit: BoxFit.fill),
+              image == null
+                  ? GestureDetector(
+                      onTap: pickImage,
+                      child: Container(
+                        padding: EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                      );
-
-                      if (!context.mounted) return;
-                      DefaultTabController.of(context).animateTo(0);
-                    },
-                  ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.add_photo_alternate, size: 64),
+                            Text("Select an image"),
+                          ],
+                        ),
+                      ),
+                    )
+                  : TextButton(
+                      onPressed: pickImage,
+                      child: Text("Change image"),
+                    ),
+              TextField(
+                controller: descriptionController,
+                maxLines: null,
+                minLines: 3,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "description",
+                  alignLabelWithHint: true,
                 ),
-              ],
-            ),
-          ],
+              ),
+              if (errMessage != null)
+                Text(
+                  errMessage!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.secondary,
+                      ),
+                      child: Text("Discard"),
+                      onPressed: () {
+                        DefaultTabController.of(context).animateTo(0);
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: FilledButton(
+                      child: Text("Post"),
+                      onPressed: () async {
+                        final image = this.image;
+
+                        final intentionId =
+                            selectedIntentionId ?? intentions.value?[0].id;
+
+                        // Should redirect to create intention page, but just in case...
+                        if (intentionId == null) {
+                          setState(() {
+                            errMessage = 'Must select an intention';
+                          });
+                          return;
+                        }
+
+                        if (image == null &&
+                            descriptionController.text.isEmpty) {
+                          setState(() {
+                            errMessage = 'Must include image or description';
+                          });
+                          return;
+                        }
+
+                        final createPost = ref.read(createPostProvider);
+                        await createPost(
+                          CreatePostBody(
+                            intentionId: intentionId,
+                            image: image != null
+                                ? await toImageDataUrl(image)
+                                : null,
+                            description: descriptionController.text,
+                          ),
+                        );
+
+                        if (!context.mounted) return;
+                        DefaultTabController.of(context).animateTo(0);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
