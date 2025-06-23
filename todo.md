@@ -1,5 +1,6 @@
-- add linting and best practices (consts, disposal stuff probably)
-- clear data on logout
+- pull up to refresh
+- option to clear image on post creation
+- clear data on logout (basically just need to add ref.watch(authUserProvider) to protected fetches)
 - make create page height more mobile friendly
 - better loading content (or just remove some spinners)
     - loading state when creating something

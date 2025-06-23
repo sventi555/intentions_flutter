@@ -16,11 +16,11 @@ Future<String?> toImageDataUrl(XFile image) async {
       } else if (ext == 'png' || ext == 'webp') {
         mimeType = 'image/$ext';
       } else {
-        print('mime type not allowed');
+        // need better error handling here...
         return null;
       }
     } catch (e) {
-      print('could not determine image type');
+      // need better error handling here...
       return null;
     }
   }

@@ -10,7 +10,7 @@ import 'package:intentions_flutter/pages/search.dart';
 void main() async {
   await firebase.init();
 
-  runApp(App());
+  runApp(ProviderScope(child: App()));
 }
 
 class App extends StatelessWidget {
@@ -18,14 +18,12 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ProviderScope(
-      child: MaterialApp(
-        title: 'Intentions',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-        ),
-        home: Home(),
+    return MaterialApp(
+      title: 'Intentions',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
       ),
+      home: Home(),
     );
   }
 }
