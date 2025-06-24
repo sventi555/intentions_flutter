@@ -11,6 +11,7 @@ import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/utils/image.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 final createRouterProvider = Provider((ref) {
   final user = ref.watch(authUserProvider).value;
@@ -112,6 +113,41 @@ class _CreatePostState extends ConsumerState<CreatePost> {
         this.imageBytes = imageBytes;
       });
     }
+  }
+
+  Future<void> onSubmit(BuildContext context, String? intentionId) async {
+    final image = this.image;
+
+    // Should redirect to create intention page, but just in case...
+    if (intentionId == null) {
+      setState(() {
+        errMessage = 'Must select an intention';
+      });
+      return;
+    }
+
+    if (image == null && descriptionController.text.isEmpty) {
+      setState(() {
+        errMessage = 'Must include image or description';
+      });
+      return;
+    }
+
+    final createPost = ref.read(createPostProvider);
+
+    context.loaderOverlay.show();
+
+    await createPost(
+      CreatePostBody(
+        intentionId: intentionId,
+        image: image != null ? await toImageDataUrl(image) : null,
+        description: descriptionController.text,
+      ),
+    );
+
+    if (!context.mounted) return;
+    context.loaderOverlay.hide();
+    DefaultTabController.of(context).animateTo(0);
   }
 
   @override
@@ -232,41 +268,11 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                   Expanded(
                     child: FilledButton(
                       child: Text("Post"),
-                      onPressed: () async {
-                        final image = this.image;
-
-                        final intentionId =
-                            selectedIntentionId ?? intentions.value?[0].id;
-
-                        // Should redirect to create intention page, but just in case...
-                        if (intentionId == null) {
-                          setState(() {
-                            errMessage = 'Must select an intention';
-                          });
-                          return;
-                        }
-
-                        if (image == null &&
-                            descriptionController.text.isEmpty) {
-                          setState(() {
-                            errMessage = 'Must include image or description';
-                          });
-                          return;
-                        }
-
-                        final createPost = ref.read(createPostProvider);
-                        await createPost(
-                          CreatePostBody(
-                            intentionId: intentionId,
-                            image: image != null
-                                ? await toImageDataUrl(image)
-                                : null,
-                            description: descriptionController.text,
-                          ),
+                      onPressed: () {
+                        onSubmit(
+                          context,
+                          selectedIntentionId ?? intentions.value?[0].id,
                         );
-
-                        if (!context.mounted) return;
-                        DefaultTabController.of(context).animateTo(0);
                       },
                     ),
                   ),

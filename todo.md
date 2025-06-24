@@ -1,10 +1,15 @@
+- image optimization (downsize/webp)
 - pull up to refresh
 - option to clear image on post creation
 - clear data on logout (basically just need to add ref.watch(authUserProvider) to protected fetches)
-- make create page height more mobile friendly
-- better loading content (or just remove some spinners)
-    - loading state when creating something
+- infinite scroll on posts (feed, intention page, profile)
+- android production deployment (play store)
+
+Tech debt:
 - handle failed api calls on write operations more gracefully in all cases
 - remove state errors from most providers (state errors should be handled from consumers probably)
-- firestore rules for feed and notifications
-- android production deployment
+- firestore rule tests for feed and notifications
+- use more of an MVC architecture
+
+Enhancements(?):
+- non-blocking image upload pipeline

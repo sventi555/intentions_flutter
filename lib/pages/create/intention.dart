@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 class CreateIntention extends ConsumerStatefulWidget {
   const CreateIntention({super.key});
@@ -16,10 +17,16 @@ class CreateIntentionState extends ConsumerState {
   bool isValid = false;
 
   Future<void> onSubmit(BuildContext context) async {
+    context.loaderOverlay.show();
+
     final createIntention = ref.read(createIntentionProvider);
     try {
       await createIntention(CreateIntentionBody(name: nameController.text));
+
+      if (context.mounted) context.loaderOverlay.hide();
     } on DuplicateIntentionException catch (_) {
+      if (context.mounted) context.loaderOverlay.hide();
+
       setState(() {
         intentionErr = 'Intention with same name already exists';
       });
@@ -27,6 +34,7 @@ class CreateIntentionState extends ConsumerState {
     }
 
     if (!context.mounted) return;
+
     if (context.canPop()) {
       context.pop();
     } else {

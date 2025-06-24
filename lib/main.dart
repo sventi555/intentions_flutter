@@ -6,6 +6,7 @@ import 'package:intentions_flutter/pages/feed.dart';
 import 'package:intentions_flutter/pages/notifications.dart';
 import 'package:intentions_flutter/pages/profile.dart';
 import 'package:intentions_flutter/pages/search.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 void main() async {
   await firebase.init();
@@ -23,7 +24,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
       ),
-      home: Home(),
+      home: LoaderOverlay(child: Home()),
     );
   }
 }
