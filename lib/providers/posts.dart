@@ -13,6 +13,9 @@ final postsProvider = FutureProvider.family<List<Post>, String>((
   ref,
   userId,
 ) async {
+  // user to clear cache when user signs out
+  ref.watch(authUserProvider);
+
   final posts = await firebase.db
       .collection('posts')
       .where('userId', isEqualTo: userId)
@@ -41,6 +44,9 @@ final intentionPostsProvider = FutureProvider.family<List<Post>, String>((
   ref,
   intentionId,
 ) async {
+  // user to clear cache when user signs out
+  ref.watch(authUserProvider);
+
   final intention = await ref.watch(intentionProvider(intentionId).future);
 
   final posts = await firebase.db

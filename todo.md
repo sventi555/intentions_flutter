@@ -1,5 +1,4 @@
 - pull up to refresh
-- clear data on logout (basically just need to add ref.watch(authUserProvider) to protected fetches)
 - infinite scroll on posts (feed, intention page, profile)
 - android production deployment (play store)
 

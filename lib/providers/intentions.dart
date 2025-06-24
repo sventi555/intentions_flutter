@@ -12,6 +12,9 @@ final intentionProvider = FutureProvider.family<Intention, String>((
   ref,
   intentionId,
 ) async {
+  // user to clear cache when user signs out
+  ref.watch(authUserProvider);
+
   final intention = await firebase.db
       .collection('intentions')
       .doc(intentionId)
@@ -49,6 +52,9 @@ final intentionsProvider =
       ref,
       arg,
     ) async {
+      // user to clear cache when user signs out
+      ref.watch(authUserProvider);
+
       if (arg.userId == null) {
         return [];
       }

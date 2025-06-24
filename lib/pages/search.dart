@@ -4,11 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:intentions_flutter/models/user.dart';
 import 'package:intentions_flutter/pages/intention.dart';
 import 'package:intentions_flutter/pages/profile.dart';
+import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/user.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 
-final searchRouterProvider = Provider(
-  (ref) => GoRouter(
+final searchRouterProvider = Provider((ref) {
+  // we want router state to reset when auth user changes
+  ref.watch(authUserProvider);
+
+  return GoRouter(
     routes: [
       GoRoute(path: '/', name: '/', builder: (context, state) => Search()),
       GoRoute(
@@ -28,8 +32,8 @@ final searchRouterProvider = Provider(
         },
       ),
     ],
-  ),
-);
+  );
+});
 
 class SearchTab extends ConsumerWidget {
   const SearchTab({super.key});
