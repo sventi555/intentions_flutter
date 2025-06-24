@@ -1,4 +1,3 @@
-- image optimization (downsize/webp)
 - pull up to refresh
 - option to clear image on post creation
 - clear data on logout (basically just need to add ref.watch(authUserProvider) to protected fetches)
