@@ -171,6 +171,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
             spacing: 8,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   intentions.when(
                     data: (intentions) => DropdownMenu<String>(
@@ -184,18 +185,14 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                           selectedIntentionId = val;
                         });
                       },
-                      dropdownMenuEntries: intentions.isNotEmpty
-                          ? intentions
-                                .map(
-                                  (intention) => DropdownMenuEntry(
-                                    label: intention.name,
-                                    value: intention.id,
-                                  ),
-                                )
-                                .toList()
-                          // If the dropdown has no entries, there's a weird visual bug.
-                          // Adding a dummy entry since the button will be disabled anyway.
-                          : [DropdownMenuEntry(label: '', value: '')],
+                      dropdownMenuEntries: intentions
+                          .map(
+                            (intention) => DropdownMenuEntry(
+                              label: intention.name,
+                              value: intention.id,
+                            ),
+                          )
+                          .toList(),
                       label: Text("Select an intention"),
                     ),
                     error: (_, _) => Text('error loading intentions'),
@@ -211,29 +208,50 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                   ),
                 ],
               ),
-              if (imageBytes != null)
-                Image.memory(imageBytes, fit: BoxFit.fill),
-              image == null
-                  ? GestureDetector(
-                      onTap: pickImage,
-                      child: Container(
-                        padding: EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(Icons.add_photo_alternate, size: 64),
-                            Text("Select an image"),
-                          ],
+              if (image != null && imageBytes != null)
+                Stack(
+                  fit: StackFit.passthrough,
+                  children: [
+                    Image.memory(imageBytes, fit: BoxFit.fill),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Color(0x66000000),
+                          ),
+                          onPressed: pickImage,
+                          child: Text(
+                            "Change image",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                            ),
+                          ),
                         ),
                       ),
-                    )
-                  : TextButton(
-                      onPressed: pickImage,
-                      child: Text("Change image"),
                     ),
+                  ],
+                ),
+              if (image == null)
+                GestureDetector(
+                  onTap: pickImage,
+                  child: Container(
+                    padding: EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.add_photo_alternate, size: 64),
+                        Text("Select an image"),
+                      ],
+                    ),
+                  ),
+                ),
               TextField(
                 controller: descriptionController,
                 maxLines: null,

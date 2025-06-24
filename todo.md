@@ -1,5 +1,4 @@
 - pull up to refresh
-- option to clear image on post creation
 - clear data on logout (basically just need to add ref.watch(authUserProvider) to protected fetches)
 - infinite scroll on posts (feed, intention page, profile)
 - android production deployment (play store)
@@ -12,3 +11,4 @@ Tech debt:
 
 Enhancements(?):
 - non-blocking image upload pipeline
+- option to clear image on post creation
