@@ -77,7 +77,7 @@ class CreateTab extends ConsumerWidget {
     final router = ref.watch(createRouterProvider);
 
     if (user.isLoading) {
-      return CircularProgressIndicator();
+      return Container();
     }
 
     return MaterialApp.router(routerConfig: router);
@@ -163,7 +163,7 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                       label: Text("Select an intention"),
                     ),
                     error: (_, _) => Text('error loading intentions'),
-                    loading: () => CircularProgressIndicator(),
+                    loading: () => Container(),
                   ),
 
                   SizedBox(width: 4),

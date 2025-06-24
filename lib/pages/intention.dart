@@ -36,7 +36,7 @@ class Intention extends ConsumerWidget {
               ),
             ),
             error: (_, _) => Text("error loading intention"),
-            loading: () => CircularProgressIndicator(),
+            loading: () => Container(),
           ),
           posts.when(
             data: (val) => Expanded(
@@ -45,7 +45,7 @@ class Intention extends ConsumerWidget {
               ),
             ),
             error: (_, _) => Text("error loading intention posts"),
-            loading: () => CircularProgressIndicator(),
+            loading: () => Container(),
           ),
         ],
       ),

@@ -75,7 +75,7 @@ class FeedTab extends ConsumerWidget {
     final router = ref.watch(feedRouterProvider);
 
     if (user.isLoading) {
-      return CircularProgressIndicator();
+      return Container();
     }
 
     return MaterialApp.router(routerConfig: router);

@@ -75,7 +75,7 @@ class ProfileTab extends ConsumerWidget {
     final router = ref.watch(profileRouterProvider);
 
     if (user.isLoading) {
-      return CircularProgressIndicator();
+      return Container();
     }
 
     return MaterialApp.router(routerConfig: router);
@@ -210,7 +210,7 @@ class Profile extends ConsumerWidget {
         ),
       ),
       error: (_, _) => Text('error fetching user'),
-      loading: () => CircularProgressIndicator(),
+      loading: () => Container(),
     );
   }
 }
@@ -249,7 +249,7 @@ class ProfilePosts extends ConsumerWidget {
         return ListView(children: [for (var post in value) Post(post: post)]);
       },
       error: (_, _) => Text('error fetching posts'),
-      loading: () => CircularProgressIndicator(),
+      loading: () => Container(),
     );
   }
 }
@@ -378,7 +378,7 @@ class _ProfileIntentionsState extends ConsumerState<ProfileIntentions> {
                 );
               },
               error: (_, _) => Text('error fetching intentions'),
-              loading: () => CircularProgressIndicator(),
+              loading: () => Container(),
             ),
           ),
         ],

@@ -78,7 +78,7 @@ class NotificationsTab extends ConsumerWidget {
     final router = ref.watch(notificationsRouterProvider);
 
     if (user.isLoading) {
-      return CircularProgressIndicator();
+      return Container();
     }
 
     return MaterialApp.router(routerConfig: router);

@@ -83,7 +83,7 @@ class Post extends ConsumerWidget {
         ),
         imageUrl.when(
           error: (_, _) => Text('error fetching image'),
-          loading: () => CircularProgressIndicator(),
+          loading: () => Container(),
           data: (url) {
             if (url != null) {
               return Image(image: NetworkImage(url), fit: BoxFit.fill);
