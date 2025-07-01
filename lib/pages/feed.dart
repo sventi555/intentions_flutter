@@ -8,6 +8,7 @@ import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/providers/posts.dart';
+import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 
 final feedRouterProvider = Provider((ref) {
@@ -90,50 +91,53 @@ class Feed extends ConsumerWidget {
     final posts = ref.watch(feedProvider);
 
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SignOutButton(),
-          posts.when(
-            data: (val) {
-              if (val.isEmpty) {
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(feedProvider.future),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SignOutButton(),
+            posts.when(
+              data: (val) {
+                if (val.isEmpty) {
+                  return ExpandedScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Nothing to show! Try:",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        SizedBox(height: 4),
+                        TextButton(
+                          onPressed: () {
+                            DefaultTabController.of(context).animateTo(1);
+                          },
+                          child: Text("following a user"),
+                        ),
+                        Text("or"),
+                        TextButton(
+                          onPressed: () {
+                            DefaultTabController.of(context).animateTo(2);
+                          },
+                          child: Text("creating an intention!"),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 return Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Nothing to show! Try:",
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      SizedBox(height: 4),
-                      TextButton(
-                        onPressed: () {
-                          DefaultTabController.of(context).animateTo(1);
-                        },
-                        child: Text("following a user"),
-                      ),
-                      Text("or"),
-                      TextButton(
-                        onPressed: () {
-                          DefaultTabController.of(context).animateTo(2);
-                        },
-                        child: Text("creating an intention!"),
-                      ),
-                    ],
+                  child: ListView(
+                    children: val.map((post) => Post(post: post)).toList(),
                   ),
                 );
-              }
-
-              return Expanded(
-                child: ListView(
-                  children: val.map((post) => Post(post: post)).toList(),
-                ),
-              );
-            },
-            error: (_, _) => Text('error fetching feed'),
-            loading: () => Container(),
-          ),
-        ],
+              },
+              error: (_, _) => Text('error fetching feed'),
+              loading: () => Container(),
+            ),
+          ],
+        ),
       ),
     );
   }
