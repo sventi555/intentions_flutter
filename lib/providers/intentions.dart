@@ -122,6 +122,26 @@ void invalidateIntentions(Ref ref, String userId) {
   }
 }
 
+Future refreshIntentions(WidgetRef ref, String userId) async {
+  final refreshes = IntentionsSortBy.values
+      .map(
+        (sortBy) => SortDirection.values.map(
+          (sortDir) => ref.refresh(
+            intentionsProvider(
+              IntentionsProviderArg(
+                userId: userId,
+                sortBy: sortBy,
+                sortDir: sortDir,
+              ),
+            ).future,
+          ),
+        ),
+      )
+      .expand((i) => i);
+
+  return Future.wait(refreshes);
+}
+
 class DuplicateIntentionException {}
 
 class CreateIntentionBody {

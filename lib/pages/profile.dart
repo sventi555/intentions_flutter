@@ -12,6 +12,7 @@ import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/providers/user.dart';
 import 'package:intentions_flutter/utils/image.dart';
+import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -121,92 +122,103 @@ class Profile extends ConsumerWidget {
 
     return profileUser.when(
       data: (user) => Scaffold(
-        body: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(8),
-              child: Row(
-                spacing: 8,
-                children: [
-                  GestureDetector(
-                    onTap: isSelf
-                        ? () async {
-                            final ImagePicker picker = ImagePicker();
-                            final image = await picker.pickImage(
-                              source: ImageSource.gallery,
-                            );
-                            if (image == null) return;
+        body: RefreshIndicator(
+          notificationPredicate: (notification) {
+            return notification.depth == 1;
+          },
+          onRefresh: () => Future.wait([
+            ref.refresh(userProvider(userId).future),
+            ref.refresh(followFromMeProvider(userId).future),
+            ref.refresh(postsProvider(userId).future),
+            refreshIntentions(ref, userId),
+          ]),
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    GestureDetector(
+                      onTap: isSelf
+                          ? () async {
+                              final ImagePicker picker = ImagePicker();
+                              final image = await picker.pickImage(
+                                source: ImageSource.gallery,
+                              );
+                              if (image == null) return;
 
-                            final imageUrl = await toImageDataUrl(image);
-                            if (imageUrl == null) return;
+                              final imageUrl = await toImageDataUrl(image);
+                              if (imageUrl == null) return;
 
-                            await updateUser(UpdateUserBody(image: imageUrl));
-                          }
-                        : null,
-                    child: ProfilePic(image: user.image, size: 128),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: 8,
-                      children: [
-                        Text(user.username, style: TextStyle(fontSize: 16)),
-                        if (!isSelf)
-                          FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: follow != null
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : Theme.of(context).colorScheme.primary,
+                              await updateUser(UpdateUserBody(image: imageUrl));
+                            }
+                          : null,
+                      child: ProfilePic(image: user.image, size: 128),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 8,
+                        children: [
+                          Text(user.username, style: TextStyle(fontSize: 16)),
+                          if (!isSelf)
+                            FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: follow != null
+                                    ? Theme.of(context).colorScheme.secondary
+                                    : Theme.of(context).colorScheme.primary,
+                              ),
+                              onPressed: () {
+                                follow == null
+                                    ? followUser(userId)
+                                    : unfollowUser(userId);
+                              },
+                              child: Text(followButtonText),
                             ),
-                            onPressed: () {
-                              follow == null
-                                  ? followUser(userId)
-                                  : unfollowUser(userId);
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              DefaultTabController(
+                length: 2,
+                child: Expanded(
+                  child: Scaffold(
+                    appBar: TabBar(
+                      tabs: [
+                        Tab(text: "Posts"),
+                        Tab(text: "Intentions"),
+                      ],
+                    ),
+                    body: TabBarView(
+                      children: [
+                        MaybePrivateWrapper(
+                          userId: userId,
+                          child: ProfilePosts(
+                            userId: userId,
+                            onClickCreatePost: () {
+                              DefaultTabController.of(context).animateTo(2);
                             },
-                            child: Text(followButtonText),
                           ),
+                        ),
+                        MaybePrivateWrapper(
+                          userId: userId,
+                          child: ProfileIntentions(
+                            userId: userId,
+                            onClickCreateIntention: () {
+                              DefaultTabController.of(context).animateTo(2);
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            DefaultTabController(
-              length: 2,
-              child: Expanded(
-                child: Scaffold(
-                  appBar: TabBar(
-                    tabs: [
-                      Tab(text: "Posts"),
-                      Tab(text: "Intentions"),
-                    ],
-                  ),
-                  body: TabBarView(
-                    children: [
-                      MaybePrivateWrapper(
-                        userId: userId,
-                        child: ProfilePosts(
-                          userId: userId,
-                          onClickCreatePost: () {
-                            DefaultTabController.of(context).animateTo(2);
-                          },
-                        ),
-                      ),
-                      MaybePrivateWrapper(
-                        userId: userId,
-                        child: ProfileIntentions(
-                          userId: userId,
-                          onClickCreateIntention: () {
-                            DefaultTabController.of(context).animateTo(2);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       error: (_, _) => Text('error fetching user'),
@@ -233,16 +245,18 @@ class ProfilePosts extends ConsumerWidget {
     return posts.when(
       data: (value) {
         if (value.isEmpty) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("No posts yet..."),
-              if (authUser.value?.uid == userId)
-                TextButton(
-                  onPressed: onClickCreatePost,
-                  child: Text("create a post!"),
-                ),
-            ],
+          return MaxHeightScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("No posts yet..."),
+                if (authUser.value?.uid == userId)
+                  TextButton(
+                    onPressed: onClickCreatePost,
+                    child: Text("create a post!"),
+                  ),
+              ],
+            ),
           );
         }
 
@@ -341,16 +355,18 @@ class _ProfileIntentionsState extends ConsumerState<ProfileIntentions> {
             child: intentions.when(
               data: (value) {
                 if (value.isEmpty) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("No intentions yet..."),
-                      if (authUser.value?.uid == widget.userId)
-                        TextButton(
-                          onPressed: widget.onClickCreateIntention,
-                          child: Text("create an intention!"),
-                        ),
-                    ],
+                  return MaxHeightScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("No intentions yet..."),
+                        if (authUser.value?.uid == widget.userId)
+                          TextButton(
+                            onPressed: widget.onClickCreateIntention,
+                            child: Text("create an intention!"),
+                          ),
+                      ],
+                    ),
                   );
                 }
 
