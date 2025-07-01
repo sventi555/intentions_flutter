@@ -11,6 +11,7 @@ import 'package:intentions_flutter/pages/profile.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/follows.dart';
 import 'package:intentions_flutter/providers/notifications.dart';
+import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 
 final notificationsRouterProvider = Provider((ref) {
@@ -93,32 +94,37 @@ class Notifications extends ConsumerWidget {
     final notifications = ref.watch(notificationsProvider);
 
     return Scaffold(
-      body: notifications.when(
-        data: (notifications) {
-          if (notifications.isEmpty) {
-            return Container(
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("No follows yet..."),
-                  Text("Share your username with a friend!"),
-                ],
-              ),
-            );
-          }
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(notificationsProvider.future),
+        child: notifications.when(
+          data: (notifications) {
+            if (notifications.isEmpty) {
+              return MaxHeightScrollView(
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("No follows yet..."),
+                      Text("Share your username with a friend!"),
+                    ],
+                  ),
+                ),
+              );
+            }
 
-          return ListView(
-            children: notifications.map((notification) {
-              if (notification is FollowNotification) {
-                return FollowNotificationTile(follow: notification);
-              }
-              throw Exception('encountered unknown notification');
-            }).toList(),
-          );
-        },
-        error: (_, _) => Text("error loading follows"),
-        loading: () => Container(),
+            return ListView(
+              children: notifications.map((notification) {
+                if (notification is FollowNotification) {
+                  return FollowNotificationTile(follow: notification);
+                }
+                throw Exception('encountered unknown notification');
+              }).toList(),
+            );
+          },
+          error: (_, _) => Text("error loading follows"),
+          loading: () => Container(),
+        ),
       ),
     );
   }

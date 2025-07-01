@@ -97,44 +97,44 @@ class Feed extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SignOutButton(),
-            posts.when(
-              data: (val) {
-                if (val.isEmpty) {
-                  return ExpandedScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Nothing to show! Try:",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        SizedBox(height: 4),
-                        TextButton(
-                          onPressed: () {
-                            DefaultTabController.of(context).animateTo(1);
-                          },
-                          child: Text("following a user"),
-                        ),
-                        Text("or"),
-                        TextButton(
-                          onPressed: () {
-                            DefaultTabController.of(context).animateTo(2);
-                          },
-                          child: Text("creating an intention!"),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+            Expanded(
+              child: posts.when(
+                data: (val) {
+                  if (val.isEmpty) {
+                    return MaxHeightScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Nothing to show! Try:",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          SizedBox(height: 4),
+                          TextButton(
+                            onPressed: () {
+                              DefaultTabController.of(context).animateTo(1);
+                            },
+                            child: Text("following a user"),
+                          ),
+                          Text("or"),
+                          TextButton(
+                            onPressed: () {
+                              DefaultTabController.of(context).animateTo(2);
+                            },
+                            child: Text("creating an intention!"),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                return Expanded(
-                  child: ListView(
+                  return ListView(
                     children: val.map((post) => Post(post: post)).toList(),
-                  ),
-                );
-              },
-              error: (_, _) => Text('error fetching feed'),
-              loading: () => Container(),
+                  );
+                },
+                error: (_, _) => Text('error fetching feed'),
+                loading: () => Container(),
+              ),
             ),
           ],
         ),
