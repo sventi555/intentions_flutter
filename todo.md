@@ -1,4 +1,3 @@
-- pull up to refresh
 - infinite scroll on posts (feed, intention page, profile)
 - android production deployment (play store)
 
