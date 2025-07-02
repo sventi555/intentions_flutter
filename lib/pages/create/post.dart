@@ -171,7 +171,6 @@ class _CreatePostState extends ConsumerState<CreatePost> {
             spacing: 8,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   intentions.when(
                     data: (intentions) => DropdownMenu<String>(
