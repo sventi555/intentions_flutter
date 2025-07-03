@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:intentions_flutter/api_config.dart';
@@ -25,20 +26,87 @@ final postsProvider = FutureProvider.family<List<Post>, String>((
   return posts.docs.map((d) => Post.fromJson(d.id, d.data())).toList();
 });
 
-final feedProvider = FutureProvider<List<Post>>((ref) async {
-  final user = await ref.watch(authUserProvider.future);
+class FeedNotifierState {
+  final List<Post> posts;
+  final bool hasNextPage;
 
-  if (user == null) {
-    return [];
+  const FeedNotifierState({required this.posts, required this.hasNextPage});
+}
+
+class FeedNotifier extends AsyncNotifier<FeedNotifierState> {
+  DocumentSnapshot? _lastDoc;
+  final _pageSize = 10;
+
+  @override
+  Future<FeedNotifierState> build() async {
+    final user = await ref.read(authUserProvider.future);
+
+    if (user == null) {
+      return FeedNotifierState(posts: [], hasNextPage: false);
+    }
+
+    final feed = await firebase.db
+        .collection('users/${user.uid}/feed')
+        .orderBy('createdAt', descending: true)
+        .limit(_pageSize)
+        .get();
+
+    if (feed.size > 0) {
+      _lastDoc = feed.docs.last;
+    }
+
+    return FeedNotifierState(
+      posts: feed.docs.map((d) => Post.fromJson(d.id, d.data())).toList(),
+      hasNextPage: feed.size == _pageSize,
+    );
   }
 
-  final feed = await firebase.db
-      .collection('users/${user.uid}/feed')
-      .orderBy('createdAt', descending: true)
-      .get();
+  Future<void> fetchPage() async {
+    if (state.isLoading) {
+      return;
+    }
 
-  return feed.docs.map((d) => Post.fromJson(d.id, d.data())).toList();
-});
+    final lastDoc = _lastDoc;
+    if (lastDoc == null) {
+      return;
+    }
+
+    final prevState = await future;
+    if (!prevState.hasNextPage) {
+      return;
+    }
+
+    final user = await ref.read(authUserProvider.future);
+    if (user == null) {
+      return;
+    }
+
+    state = AsyncLoading();
+
+    final nextPage = await firebase.db
+        .collection('users/${user.uid}/feed')
+        .orderBy('createdAt', descending: true)
+        .startAfterDocument(lastDoc)
+        .limit(_pageSize)
+        .get();
+
+    if (nextPage.size > 0) {
+      _lastDoc = nextPage.docs.last;
+    }
+
+    state = AsyncData(
+      FeedNotifierState(
+        posts: [
+          ...prevState.posts,
+          ...nextPage.docs.map((doc) => Post.fromJson(doc.id, doc.data())),
+        ],
+        hasNextPage: nextPage.size == _pageSize,
+      ),
+    );
+  }
+}
+
+final feedProvider = AsyncNotifierProvider(() => FeedNotifier());
 
 final intentionPostsProvider = FutureProvider.family<List<Post>, String>((
   ref,

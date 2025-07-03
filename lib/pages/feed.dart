@@ -83,12 +83,61 @@ class FeedTab extends ConsumerWidget {
   }
 }
 
-class Feed extends ConsumerWidget {
+class Feed extends ConsumerStatefulWidget {
   const Feed({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final posts = ref.watch(feedProvider);
+  ConsumerState<Feed> createState() {
+    return _FeedState();
+  }
+}
+
+class _FeedState extends ConsumerState<Feed> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent) {
+      final feedState = ref.read(feedProvider);
+      final feedNotifier = ref.read(feedProvider.notifier);
+
+      if (!feedState.isLoading && feedState.value?.hasNextPage == true) {
+        feedNotifier.fetchPage();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final feedState = ref.watch(feedProvider);
+
+    final postsList = ListView(
+      physics: AlwaysScrollableScrollPhysics(),
+      controller: _scrollController,
+      children: [
+        ...(feedState.value?.posts ?? []).map((post) => Post(post: post)),
+        if (feedState.isLoading && feedState.value?.posts.isNotEmpty == true)
+          Container(
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(),
+          ),
+        if (!feedState.isLoading && feedState.value?.hasNextPage == false)
+          Container(
+            padding: EdgeInsets.all(4),
+            alignment: Alignment.center,
+            child: Text(
+              "no more posts...",
+              style: TextStyle(color: Theme.of(context).disabledColor),
+            ),
+          ),
+      ],
+    );
 
     return Scaffold(
       body: RefreshIndicator(
@@ -98,9 +147,9 @@ class Feed extends ConsumerWidget {
           children: [
             SignOutButton(),
             Expanded(
-              child: posts.when(
+              child: feedState.when(
                 data: (val) {
-                  if (val.isEmpty) {
+                  if (val.posts.isEmpty) {
                     return MaxHeightScrollView(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -128,12 +177,10 @@ class Feed extends ConsumerWidget {
                     );
                   }
 
-                  return ListView(
-                    children: val.map((post) => Post(post: post)).toList(),
-                  );
+                  return postsList;
                 },
                 error: (_, _) => Text('error fetching feed'),
-                loading: () => Container(),
+                loading: () => postsList,
               ),
             ),
           ],
