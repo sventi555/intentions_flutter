@@ -9,6 +9,8 @@ import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/models/post.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
+import 'package:intentions_flutter/providers/paged.dart';
+import 'package:intentions_flutter/utils/json.dart';
 
 final postsProvider = FutureProvider.family<List<Post>, String>((
   ref,
@@ -26,83 +28,40 @@ final postsProvider = FutureProvider.family<List<Post>, String>((
   return posts.docs.map((d) => Post.fromJson(d.id, d.data())).toList();
 });
 
-class FeedNotifierState {
-  final List<Post> posts;
-  final bool hasNextPage;
-
-  const FeedNotifierState({required this.posts, required this.hasNextPage});
-}
-
-class FeedNotifier extends AsyncNotifier<FeedNotifierState> {
-  DocumentSnapshot? _lastDoc;
-  final _pageSize = 10;
+class FeedNotifier extends PagedNotifier<Post> {
+  FeedNotifier() : super(itemFromJson: Post.fromJson);
 
   @override
-  Future<FeedNotifierState> build() async {
+  Future<QuerySnapshot<Json>?> firstPageItems(int pageSize) async {
     final user = await ref.read(authUserProvider.future);
 
     if (user == null) {
-      return FeedNotifierState(posts: [], hasNextPage: false);
+      return null;
     }
 
-    final feed = await firebase.db
+    return firebase.db
         .collection('users/${user.uid}/feed')
         .orderBy('createdAt', descending: true)
-        .limit(_pageSize)
+        .limit(pageSize)
         .get();
-
-    if (feed.size > 0) {
-      _lastDoc = feed.docs.last;
-    }
-
-    return FeedNotifierState(
-      posts: feed.docs.map((d) => Post.fromJson(d.id, d.data())).toList(),
-      hasNextPage: feed.size == _pageSize,
-    );
   }
 
-  Future<void> fetchPage() async {
-    if (state.isLoading) {
-      return;
-    }
-
-    final lastDoc = _lastDoc;
-    if (lastDoc == null) {
-      return;
-    }
-
-    final prevState = await future;
-    if (!prevState.hasNextPage) {
-      return;
-    }
-
+  @override
+  Future<QuerySnapshot<Json>?> nthPageItems(
+    int pageSize,
+    DocumentSnapshot<Object?> lastDoc,
+  ) async {
     final user = await ref.read(authUserProvider.future);
     if (user == null) {
-      return;
+      return null;
     }
 
-    state = AsyncLoading();
-
-    final nextPage = await firebase.db
+    return firebase.db
         .collection('users/${user.uid}/feed')
         .orderBy('createdAt', descending: true)
         .startAfterDocument(lastDoc)
-        .limit(_pageSize)
+        .limit(pageSize)
         .get();
-
-    if (nextPage.size > 0) {
-      _lastDoc = nextPage.docs.last;
-    }
-
-    state = AsyncData(
-      FeedNotifierState(
-        posts: [
-          ...prevState.posts,
-          ...nextPage.docs.map((doc) => Post.fromJson(doc.id, doc.data())),
-        ],
-        hasNextPage: nextPage.size == _pageSize,
-      ),
-    );
   }
 }
 

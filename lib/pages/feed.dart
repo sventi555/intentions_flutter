@@ -121,8 +121,8 @@ class _FeedState extends ConsumerState<Feed> {
       physics: AlwaysScrollableScrollPhysics(),
       controller: _scrollController,
       children: [
-        ...(feedState.value?.posts ?? []).map((post) => Post(post: post)),
-        if (feedState.isLoading && feedState.value?.posts.isNotEmpty == true)
+        ...(feedState.value?.items ?? []).map((post) => Post(post: post)),
+        if (feedState.isLoading && feedState.value?.items.isNotEmpty == true)
           Container(
             alignment: Alignment.center,
             child: CircularProgressIndicator(),
@@ -149,7 +149,7 @@ class _FeedState extends ConsumerState<Feed> {
             Expanded(
               child: feedState.when(
                 data: (val) {
-                  if (val.posts.isEmpty) {
+                  if (val.items.isEmpty) {
                     return MaxHeightScrollView(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
