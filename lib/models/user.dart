@@ -1,3 +1,5 @@
+import 'package:intentions_flutter/utils/json.dart';
+
 class User {
   final String id;
   final String email;
@@ -13,7 +15,7 @@ class User {
     this.image,
   });
 
-  factory User.fromJson(String id, Map<String, dynamic> json) {
+  factory User.fromJson(String id, Json json) {
     return User(
       id: id,
       email: json['email'],

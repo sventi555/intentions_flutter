@@ -1,4 +1,5 @@
 import 'package:intentions_flutter/models/follow.dart';
+import 'package:intentions_flutter/utils/json.dart';
 
 enum NotificationKind { follow }
 
@@ -20,10 +21,7 @@ class FollowNotificationUser {
     this.image,
   });
 
-  factory FollowNotificationUser.fromJson(
-    String id,
-    Map<String, dynamic> json,
-  ) {
+  factory FollowNotificationUser.fromJson(String id, Json json) {
     return FollowNotificationUser(
       id: id,
       username: json['username'],
@@ -44,7 +42,7 @@ class FollowNotification extends Notification {
     required super.createdAt,
   }) : super(kind: NotificationKind.follow);
 
-  factory FollowNotification.fromJson(Map<String, dynamic> json) {
+  factory FollowNotification.fromJson(Json json) {
     return FollowNotification(
       fromUser: FollowNotificationUser.fromJson(
         json['data']['fromUserId'],

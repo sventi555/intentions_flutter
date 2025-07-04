@@ -1,3 +1,5 @@
+import 'package:intentions_flutter/utils/json.dart';
+
 enum FollowStatus { pending, accepted }
 
 class Follow {
@@ -6,7 +8,7 @@ class Follow {
 
   const Follow({required this.status, required this.fromUser});
 
-  factory Follow.fromJson(String fromUserId, Map<String, dynamic> json) {
+  factory Follow.fromJson(String fromUserId, Json json) {
     return Follow(
       status: json['status'] == 'pending'
           ? FollowStatus.pending

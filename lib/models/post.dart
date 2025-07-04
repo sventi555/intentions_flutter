@@ -1,10 +1,12 @@
+import 'package:intentions_flutter/utils/json.dart';
+
 class PostUser {
   final String username;
   final String? image;
 
   const PostUser({required this.username, this.image});
 
-  factory PostUser.fromJson(Map<String, dynamic> json) {
+  factory PostUser.fromJson(Json json) {
     return PostUser(username: json['username'], image: json['image']);
   }
 }
@@ -14,7 +16,7 @@ class PostIntention {
 
   const PostIntention({required this.name});
 
-  factory PostIntention.fromJson(Map<String, dynamic> json) {
+  factory PostIntention.fromJson(Json json) {
     return PostIntention(name: json['name']);
   }
 }
@@ -40,7 +42,7 @@ class Post {
     this.image,
   });
 
-  factory Post.fromJson(String id, Map<String, dynamic> json) {
+  factory Post.fromJson(String id, Json json) {
     return Post(
       id: id,
       userId: json['userId'],

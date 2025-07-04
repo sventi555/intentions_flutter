@@ -1,9 +1,11 @@
+import 'package:intentions_flutter/utils/json.dart';
+
 class IntentionUser {
   final String username;
 
   const IntentionUser({required this.username});
 
-  factory IntentionUser.fromJson(Map<String, dynamic> json) {
+  factory IntentionUser.fromJson(Json json) {
     return IntentionUser(username: json['username']);
   }
 }
@@ -27,7 +29,7 @@ class Intention {
     required this.postCount,
   });
 
-  factory Intention.fromJson(String id, Map<String, dynamic> json) {
+  factory Intention.fromJson(String id, Json json) {
     return Intention(
       id: id,
       userId: json['userId'],
