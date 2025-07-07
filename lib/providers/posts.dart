@@ -12,6 +12,8 @@ import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/paged.dart';
 import 'package:intentions_flutter/utils/json.dart';
 
+class PostsNotifier extends PagedNotifier<Post> {}
+
 final postsProvider = FutureProvider.family<List<Post>, String>((
   ref,
   userId,
@@ -32,7 +34,7 @@ class FeedNotifier extends PagedNotifier<Post> {
   FeedNotifier() : super(itemFromJson: Post.fromJson);
 
   @override
-  Future<QuerySnapshot<Json>?> firstPageItems(int pageSize) async {
+  Future<Query<Json>?> itemsQuery() async {
     final user = await ref.read(authUserProvider.future);
 
     if (user == null) {
@@ -41,27 +43,7 @@ class FeedNotifier extends PagedNotifier<Post> {
 
     return firebase.db
         .collection('users/${user.uid}/feed')
-        .orderBy('createdAt', descending: true)
-        .limit(pageSize)
-        .get();
-  }
-
-  @override
-  Future<QuerySnapshot<Json>?> nthPageItems(
-    int pageSize,
-    DocumentSnapshot<Object?> lastDoc,
-  ) async {
-    final user = await ref.read(authUserProvider.future);
-    if (user == null) {
-      return null;
-    }
-
-    return firebase.db
-        .collection('users/${user.uid}/feed')
-        .orderBy('createdAt', descending: true)
-        .startAfterDocument(lastDoc)
-        .limit(pageSize)
-        .get();
+        .orderBy('createdAt', descending: true);
   }
 }
 

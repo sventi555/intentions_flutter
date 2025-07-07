@@ -18,15 +18,12 @@ abstract class PagedNotifier<T> extends AsyncNotifier<PagedNotifierState<T>> {
 
   PagedNotifier({required this.itemFromJson});
 
-  Future<QuerySnapshot<Json>?> firstPageItems(int pageSize);
-  Future<QuerySnapshot<Json>?> nthPageItems(
-    int pageSize,
-    DocumentSnapshot lastDoc,
-  );
+  Future<Query<Json>?> itemsQuery();
 
   @override
   Future<PagedNotifierState<T>> build() async {
-    final firstPage = await firstPageItems(_pageSize);
+    final query = await itemsQuery();
+    final firstPage = await query?.limit(_pageSize).get();
 
     if (firstPage == null) {
       return PagedNotifierState<T>(items: [], hasNextPage: false);
@@ -60,7 +57,12 @@ abstract class PagedNotifier<T> extends AsyncNotifier<PagedNotifierState<T>> {
     state = AsyncLoading();
 
     try {
-      final nextPage = await nthPageItems(_pageSize, lastDoc);
+      final query = await itemsQuery();
+      final nextPage = await query
+          ?.startAfterDocument(lastDoc)
+          .limit(_pageSize)
+          .get();
+
       if (nextPage == null) {
         state = AsyncData(prevState);
         return;
