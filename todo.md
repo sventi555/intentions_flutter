@@ -1,4 +1,7 @@
 - infinite scroll on posts (feed, intention page, profile)
+    - extract infinite posts widget to use on intentions and profile
+    - update other post providers to be paged providers
+    - update respective pages to use new notifier providers and list widgets
 - android production deployment (play store)
 
 Tech debt:
