@@ -11,18 +11,54 @@ class PagedNotifierState<T> {
   const PagedNotifierState({required this.items, required this.hasNextPage});
 }
 
-abstract class PagedNotifier<T> extends AsyncNotifier<PagedNotifierState<T>> {
-  final _pageSize = 10;
-  DocumentSnapshot? _lastDoc;
-  final T Function(String id, Json json) itemFromJson;
-
-  PagedNotifier({required this.itemFromJson});
-
-  Future<Query<Json>?> itemsQuery();
+abstract class PagedNotifier<T> extends AsyncNotifier<PagedNotifierState<T>>
+    with _PagedNotifierMixin<T, void> {
+  FutureOr<Query<Json>?> itemsQuery();
 
   @override
-  Future<PagedNotifierState<T>> build() async {
-    final query = await itemsQuery();
+  FutureOr<Query<Json>?> _itemsQuery(_) {
+    return itemsQuery();
+  }
+
+  @override
+  FutureOr<PagedNotifierState<T>> build() {
+    return buildState(null);
+  }
+}
+
+abstract class FamilyPagedNotifier<T, P>
+    extends FamilyAsyncNotifier<PagedNotifierState<T>, P>
+    with _PagedNotifierMixin<T, P> {
+  FutureOr<Query<Json>?> itemsQuery(P param);
+
+  @override
+  FutureOr<Query<Json>?> _itemsQuery(P param) {
+    return itemsQuery(param);
+  }
+
+  @override
+  FutureOr<PagedNotifierState<T>> build(P param) {
+    return buildState(param);
+  }
+}
+
+mixin _PagedNotifierMixin<T, P> {
+  final _pageSize = 10;
+  late P _param;
+  DocumentSnapshot? _lastDoc;
+
+  T itemFromJson(String id, Json json);
+  FutureOr<Query<Json>?> _itemsQuery(P param);
+
+  // from AsyncNotifier
+  AsyncValue<PagedNotifierState<T>> get state;
+  set state(AsyncValue<PagedNotifierState<T>> val);
+  Future<PagedNotifierState<T>> get future;
+
+  Future<PagedNotifierState<T>> buildState(P param) async {
+    _param = param;
+
+    final query = await _itemsQuery(param);
     final firstPage = await query?.limit(_pageSize).get();
 
     if (firstPage == null) {
@@ -57,7 +93,7 @@ abstract class PagedNotifier<T> extends AsyncNotifier<PagedNotifierState<T>> {
     state = AsyncLoading();
 
     try {
-      final query = await itemsQuery();
+      final query = await _itemsQuery(this._param);
       final nextPage = await query
           ?.startAfterDocument(lastDoc)
           .limit(_pageSize)

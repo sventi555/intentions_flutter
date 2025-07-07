@@ -12,8 +12,6 @@ import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/paged.dart';
 import 'package:intentions_flutter/utils/json.dart';
 
-class PostsNotifier extends PagedNotifier<Post> {}
-
 final postsProvider = FutureProvider.family<List<Post>, String>((
   ref,
   userId,
@@ -31,7 +29,10 @@ final postsProvider = FutureProvider.family<List<Post>, String>((
 });
 
 class FeedNotifier extends PagedNotifier<Post> {
-  FeedNotifier() : super(itemFromJson: Post.fromJson);
+  @override
+  Post itemFromJson(String id, Json json) {
+    return Post.fromJson(id, json);
+  }
 
   @override
   Future<Query<Json>?> itemsQuery() async {
