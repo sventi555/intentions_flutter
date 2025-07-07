@@ -10,6 +10,7 @@ import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
 import 'package:intentions_flutter/widgets/post.dart';
+import 'package:intentions_flutter/widgets/posts_list.dart';
 
 final feedRouterProvider = Provider((ref) {
   final user = ref.watch(authUserProvider).value;
@@ -83,60 +84,17 @@ class FeedTab extends ConsumerWidget {
   }
 }
 
-class Feed extends ConsumerStatefulWidget {
+class Feed extends ConsumerWidget {
   const Feed({super.key});
 
   @override
-  ConsumerState<Feed> createState() {
-    return _FeedState();
-  }
-}
-
-class _FeedState extends ConsumerState<Feed> {
-  final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent) {
-      final feedState = ref.read(feedProvider);
-      final feedNotifier = ref.read(feedProvider.notifier);
-
-      if (!feedState.isLoading && feedState.value?.hasNextPage == true) {
-        feedNotifier.fetchPage();
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final feedState = ref.watch(feedProvider);
+    final feedNotifier = ref.read(feedProvider.notifier);
 
-    final postsList = ListView(
-      physics: AlwaysScrollableScrollPhysics(),
-      controller: _scrollController,
-      children: [
-        ...(feedState.value?.items ?? []).map((post) => Post(post: post)),
-        if (feedState.isLoading && feedState.value?.items.isNotEmpty == true)
-          Container(
-            alignment: Alignment.center,
-            child: CircularProgressIndicator(),
-          ),
-        if (!feedState.isLoading && feedState.value?.hasNextPage == false)
-          Container(
-            padding: EdgeInsets.all(4),
-            alignment: Alignment.center,
-            child: Text(
-              "no more posts...",
-              style: TextStyle(color: Theme.of(context).disabledColor),
-            ),
-          ),
-      ],
+    final postsList = PostsList(
+      state: feedState,
+      fetchPage: feedNotifier.fetchPage,
     );
 
     return Scaffold(
