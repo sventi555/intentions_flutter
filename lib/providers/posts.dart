@@ -40,7 +40,7 @@ class FeedNotifier extends PagedNotifier<Post> {
 
   @override
   FutureOr<Query<Json>?> itemsQuery() async {
-    final user = await ref.read(authUserProvider.future);
+    final user = await ref.watch(authUserProvider.future);
 
     if (user == null) {
       return null;
