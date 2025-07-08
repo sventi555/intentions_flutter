@@ -12,21 +12,25 @@ import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/providers/paged.dart';
 import 'package:intentions_flutter/utils/json.dart';
 
-final postsProvider = FutureProvider.family<List<Post>, String>((
-  ref,
-  userId,
-) async {
-  // user to clear cache when user signs out
-  ref.watch(authUserProvider);
+class PostsNotifier extends FamilyPagedNotifier<Post, String> {
+  @override
+  Post itemFromJson(String id, Json json) {
+    return Post.fromJson(id, json);
+  }
 
-  final posts = await firebase.db
-      .collection('posts')
-      .where('userId', isEqualTo: userId)
-      .orderBy('createdAt', descending: true)
-      .get();
+  @override
+  FutureOr<Query<Json>?> itemsQuery(String userId) {
+    // user to clear cache when user signs out
+    ref.watch(authUserProvider);
 
-  return posts.docs.map((d) => Post.fromJson(d.id, d.data())).toList();
-});
+    return firebase.db
+        .collection('posts')
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true);
+  }
+}
+
+final postsProvider = AsyncNotifierProvider.family(() => PostsNotifier());
 
 class FeedNotifier extends PagedNotifier<Post> {
   @override
@@ -35,7 +39,7 @@ class FeedNotifier extends PagedNotifier<Post> {
   }
 
   @override
-  Future<Query<Json>?> itemsQuery() async {
+  FutureOr<Query<Json>?> itemsQuery() async {
     final user = await ref.read(authUserProvider.future);
 
     if (user == null) {

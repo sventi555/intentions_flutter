@@ -14,6 +14,7 @@ import 'package:intentions_flutter/providers/user.dart';
 import 'package:intentions_flutter/utils/image.dart';
 import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
 import 'package:intentions_flutter/widgets/post.dart';
+import 'package:intentions_flutter/widgets/posts_list.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -240,11 +241,17 @@ class ProfilePosts extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authUser = ref.watch(authUserProvider);
-    final posts = ref.watch(postsProvider(userId));
+    final postsState = ref.watch(postsProvider(userId));
+    final postsNotifier = ref.read(postsProvider(userId).notifier);
 
-    return posts.when(
+    final postsList = PostsList(
+      state: postsState,
+      fetchPage: postsNotifier.fetchPage,
+    );
+
+    return postsState.when(
       data: (value) {
-        if (value.isEmpty) {
+        if (value.items.isEmpty) {
           return MaxHeightScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -260,10 +267,10 @@ class ProfilePosts extends ConsumerWidget {
           );
         }
 
-        return ListView(children: [for (var post in value) Post(post: post)]);
+        return postsList;
       },
       error: (_, _) => Text('error fetching posts'),
-      loading: () => Container(),
+      loading: () => postsList,
     );
   }
 }
