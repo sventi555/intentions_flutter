@@ -54,25 +54,31 @@ class FeedNotifier extends PagedNotifier<Post> {
 
 final feedProvider = AsyncNotifierProvider(() => FeedNotifier());
 
-final intentionPostsProvider = FutureProvider.family<List<Post>, String>((
-  ref,
-  intentionId,
-) async {
-  // user to clear cache when user signs out
-  ref.watch(authUserProvider);
+class IntentionsPostsNotifier extends FamilyPagedNotifier<Post, String> {
+  @override
+  Post itemFromJson(String id, Json json) {
+    return Post.fromJson(id, json);
+  }
 
-  final intention = await ref.watch(intentionProvider(intentionId).future);
+  @override
+  FutureOr<Query<Json>?> itemsQuery(String intentionId) async {
+    // user to clear cache when user signs out
+    ref.watch(authUserProvider);
 
-  final posts = await firebase.db
-      .collection('posts')
-      // needed to appease firestore rule logic
-      .where('userId', isEqualTo: intention.userId)
-      .where('intentionId', isEqualTo: intentionId)
-      .orderBy('createdAt', descending: true)
-      .get();
+    final intention = await ref.watch(intentionProvider(intentionId).future);
 
-  return posts.docs.map((doc) => Post.fromJson(doc.id, doc.data())).toList();
-});
+    return firebase.db
+        .collection('posts')
+        // needed to appease firestore rule logic
+        .where('userId', isEqualTo: intention.userId)
+        .where('intentionId', isEqualTo: intentionId)
+        .orderBy('createdAt', descending: true);
+  }
+}
+
+final intentionPostsProvider = AsyncNotifierProvider.family(
+  () => IntentionsPostsNotifier(),
+);
 
 class CreatePostBody {
   final String intentionId;

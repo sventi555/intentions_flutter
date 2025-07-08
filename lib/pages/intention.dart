@@ -4,6 +4,7 @@ import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
 import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/providers/posts.dart';
+import 'package:intentions_flutter/widgets/posts_list.dart';
 
 class Intention extends ConsumerWidget {
   final String intentionId;
@@ -12,8 +13,16 @@ class Intention extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final posts = ref.watch(intentionPostsProvider(intentionId));
     final intention = ref.watch(intentionProvider(intentionId));
+    final postsState = ref.watch(intentionPostsProvider(intentionId));
+    final postsNotifier = ref.watch(
+      intentionPostsProvider(intentionId).notifier,
+    );
+
+    final postsList = PostsList(
+      state: postsState,
+      fetchPage: postsNotifier.fetchPage,
+    );
 
     return Scaffold(
       body: RefreshIndicator(
@@ -48,9 +57,9 @@ class Intention extends ConsumerWidget {
               loading: () => Container(),
             ),
             Expanded(
-              child: posts.when(
+              child: postsState.when(
                 data: (val) {
-                  if (val.isEmpty) {
+                  if (val.items.isEmpty) {
                     return MaxHeightScrollView(
                       child: Container(
                         alignment: Alignment.center,
@@ -59,12 +68,10 @@ class Intention extends ConsumerWidget {
                     );
                   }
 
-                  return ListView(
-                    children: val.map((post) => Post(post: post)).toList(),
-                  );
+                  return postsList;
                 },
                 error: (_, _) => Text("error loading intention posts"),
-                loading: () => Container(),
+                loading: () => postsList,
               ),
             ),
           ],
