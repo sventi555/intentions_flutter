@@ -1,4 +1,3 @@
-- fix self profile link on user tab
 - android production deployment (play store)
 
 Tech debt:

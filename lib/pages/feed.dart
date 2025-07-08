@@ -9,7 +9,6 @@ import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
-import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/widgets/posts_list.dart';
 
 final feedRouterProvider = Provider((ref) {
@@ -33,7 +32,11 @@ final feedRouterProvider = Provider((ref) {
         builder: (context, state) {
           final userId = state.pathParameters['userId']!;
 
-          return Profile(userId: userId);
+          return Profile(
+            userId: userId,
+            getProfileUri: (String id) => id != userId ? '/user/$userId' : null,
+            getIntentionUri: (String intentionId) => '/intention/$intentionId',
+          );
         },
       ),
       GoRoute(
@@ -41,7 +44,12 @@ final feedRouterProvider = Provider((ref) {
         builder: (context, state) {
           final intentionId = state.pathParameters['intentionId']!;
 
-          return Intention(intentionId: intentionId);
+          return Intention(
+            intentionId: intentionId,
+            getProfileUri: (String userId) => '/user/$userId',
+            getIntentionUri: (String id) =>
+                id != intentionId ? '/intention/$intentionId' : null,
+          );
         },
       ),
       GoRoute(
@@ -95,6 +103,8 @@ class Feed extends ConsumerWidget {
     final postsList = PostsList(
       state: feedState,
       fetchPage: feedNotifier.fetchPage,
+      getProfileUri: (String userId) => '/user/$userId',
+      getIntentionUri: (String intentionId) => '/intention/$intentionId',
     );
 
     return Scaffold(

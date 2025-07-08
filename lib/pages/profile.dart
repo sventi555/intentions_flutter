@@ -13,7 +13,6 @@ import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/providers/user.dart';
 import 'package:intentions_flutter/utils/image.dart';
 import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
-import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/widgets/posts_list.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -36,11 +35,28 @@ final profileRouterProvider = Provider((ref) {
         },
       ),
       GoRoute(
+        path: '/user/:userId',
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+
+          return Profile(
+            userId: userId,
+            getProfileUri: (String id) => id != userId ? '/user/$userId' : null,
+            getIntentionUri: (String intentionId) => '/intention/$intentionId',
+          );
+        },
+      ),
+      GoRoute(
         path: '/intention/:intentionId',
         builder: (context, state) {
           final intentionId = state.pathParameters['intentionId']!;
 
-          return Intention(intentionId: intentionId);
+          return Intention(
+            intentionId: intentionId,
+            getProfileUri: (String userId) => '/user/$userId',
+            getIntentionUri: (String intId) =>
+                intId != intentionId ? '/intention/$intentionId' : null,
+          );
         },
       ),
       GoRoute(
@@ -94,14 +110,27 @@ class MyProfile extends ConsumerWidget {
       throw StateError('must be signed in to see my profile');
     }
 
-    return Profile(userId: authUser.uid);
+    return Profile(
+      userId: authUser.uid,
+      getProfileUri: (String userId) =>
+          userId != authUser.uid ? '/user/$userId' : null,
+      getIntentionUri: (String intentionId) => '/intention/$intentionId',
+    );
   }
 }
 
 class Profile extends ConsumerWidget {
   final String userId;
 
-  const Profile({super.key, required this.userId});
+  final String? Function(String userId) getProfileUri;
+  final String? Function(String intentionId) getIntentionUri;
+
+  const Profile({
+    super.key,
+    required this.userId,
+    required this.getProfileUri,
+    required this.getIntentionUri,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -202,6 +231,8 @@ class Profile extends ConsumerWidget {
                             onClickCreatePost: () {
                               DefaultTabController.of(context).animateTo(2);
                             },
+                            getProfileUri: getProfileUri,
+                            getIntentionUri: getIntentionUri,
                           ),
                         ),
                         MaybePrivateWrapper(
@@ -211,6 +242,7 @@ class Profile extends ConsumerWidget {
                             onClickCreateIntention: () {
                               DefaultTabController.of(context).animateTo(2);
                             },
+                            getIntentionUri: getIntentionUri,
                           ),
                         ),
                       ],
@@ -232,10 +264,15 @@ class ProfilePosts extends ConsumerWidget {
   final String userId;
   final Function() onClickCreatePost;
 
+  final String? Function(String userId) getProfileUri;
+  final String? Function(String intentionId) getIntentionUri;
+
   const ProfilePosts({
     super.key,
     required this.userId,
     required this.onClickCreatePost,
+    required this.getProfileUri,
+    required this.getIntentionUri,
   });
 
   @override
@@ -247,6 +284,8 @@ class ProfilePosts extends ConsumerWidget {
     final postsList = PostsList(
       state: postsState,
       fetchPage: postsNotifier.fetchPage,
+      getProfileUri: getProfileUri,
+      getIntentionUri: getIntentionUri,
     );
 
     return postsState.when(
@@ -278,11 +317,13 @@ class ProfilePosts extends ConsumerWidget {
 class ProfileIntentions extends ConsumerStatefulWidget {
   final String userId;
   final Function() onClickCreateIntention;
+  final String? Function(String intentionId) getIntentionUri;
 
   const ProfileIntentions({
     super.key,
     required this.userId,
     required this.onClickCreateIntention,
+    required this.getIntentionUri,
   });
 
   @override
@@ -394,7 +435,12 @@ class _ProfileIntentionsState extends ConsumerState<ProfileIntentions> {
                               )
                             : null,
                         onTap: () {
-                          context.push('/intention/${intention.id}');
+                          final intentionUri = widget.getIntentionUri(
+                            intention.id,
+                          );
+                          if (intentionUri != null) {
+                            context.push('/intention/${intention.id}');
+                          }
                         },
                       ),
                   ],

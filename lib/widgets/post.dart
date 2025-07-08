@@ -8,23 +8,26 @@ import 'package:timeago/timeago.dart' as timeago;
 
 class Post extends ConsumerWidget {
   final post_models.Post post;
+  final String? Function(String userId) getProfileUri;
+  final String? Function(String intentionId) getIntentionUri;
 
-  const Post({super.key, required this.post});
+  const Post({
+    super.key,
+    required this.post,
+    required this.getProfileUri,
+    required this.getIntentionUri,
+  });
 
   void goToProfile(BuildContext context) {
-    final userProfileUri = '/user/${post.userId}';
-    final alreadyOnProfile =
-        GoRouter.of(context).state.uri.toString() == userProfileUri;
-    if (!alreadyOnProfile) {
-      context.push(userProfileUri);
+    final profileUri = getProfileUri(post.userId);
+    if (profileUri != null) {
+      context.push(profileUri);
     }
   }
 
   void goToIntention(BuildContext context) {
-    final intentionUri = '/intention/${post.intentionId}';
-    final alreadyOnIntention =
-        GoRouter.of(context).state.uri.toString() == intentionUri;
-    if (!alreadyOnIntention) {
+    final intentionUri = getIntentionUri(post.intentionId);
+    if (intentionUri != null) {
       context.push(intentionUri);
     }
   }

@@ -35,7 +35,11 @@ final notificationsRouterProvider = Provider((ref) {
         builder: (context, state) {
           final userId = state.pathParameters['userId']!;
 
-          return Profile(userId: userId);
+          return Profile(
+            userId: userId,
+            getProfileUri: (String id) => id != userId ? '/user/$userId' : null,
+            getIntentionUri: (String intentionId) => '/intention/$intentionId',
+          );
         },
       ),
       GoRoute(
@@ -43,7 +47,12 @@ final notificationsRouterProvider = Provider((ref) {
         builder: (context, state) {
           final intentionId = state.pathParameters['intentionId']!;
 
-          return Intention(intentionId: intentionId);
+          return Intention(
+            intentionId: intentionId,
+            getProfileUri: (String userId) => '/user/$userId',
+            getIntentionUri: (String id) =>
+                id != intentionId ? '/intention/$intentionId' : null,
+          );
         },
       ),
       GoRoute(

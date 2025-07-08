@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intentions_flutter/providers/intentions.dart';
 import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
-import 'package:intentions_flutter/widgets/post.dart';
 import 'package:intentions_flutter/providers/posts.dart';
 import 'package:intentions_flutter/widgets/posts_list.dart';
 
 class Intention extends ConsumerWidget {
   final String intentionId;
 
-  const Intention({super.key, required this.intentionId});
+  final String? Function(String userId) getProfileUri;
+  final String? Function(String intentionId) getIntentionUri;
+
+  const Intention({
+    super.key,
+    required this.intentionId,
+    required this.getProfileUri,
+    required this.getIntentionUri,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,6 +29,8 @@ class Intention extends ConsumerWidget {
     final postsList = PostsList(
       state: postsState,
       fetchPage: postsNotifier.fetchPage,
+      getProfileUri: getProfileUri,
+      getIntentionUri: getIntentionUri,
     );
 
     return Scaffold(
