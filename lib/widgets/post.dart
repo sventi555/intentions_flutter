@@ -77,6 +77,8 @@ class Post extends ConsumerWidget {
                   goToIntention(context);
                 },
                 child: Chip(
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   label: Text(post.intention.name),
                   padding: EdgeInsets.all(0),
                 ),

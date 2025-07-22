@@ -54,10 +54,15 @@ class _PostsListState extends ConsumerState<PostsList> {
       controller: _scrollController,
       children: [
         ...(state.value?.items ?? []).map(
-          (post) => Post(
-            post: post,
-            getProfileUri: widget.getProfileUri,
-            getIntentionUri: widget.getIntentionUri,
+          (post) => Column(
+            children: [
+              Post(
+                post: post,
+                getProfileUri: widget.getProfileUri,
+                getIntentionUri: widget.getIntentionUri,
+              ),
+              if (post.id != state.value?.items.last.id) SizedBox(height: 8),
+            ],
           ),
         ),
         if (state.isLoading && state.value?.items.isNotEmpty == true)
@@ -67,7 +72,7 @@ class _PostsListState extends ConsumerState<PostsList> {
           ),
         if (!state.isLoading && state.value?.hasNextPage == false)
           Container(
-            padding: EdgeInsets.all(4),
+            padding: EdgeInsets.all(16),
             alignment: Alignment.center,
             child: Text(
               "no more posts...",
