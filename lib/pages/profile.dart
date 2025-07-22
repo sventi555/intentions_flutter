@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/models/follow.dart';
 import 'package:intentions_flutter/pages/auth/sign_in.dart';
 import 'package:intentions_flutter/pages/auth/sign_up.dart';
@@ -167,48 +168,77 @@ class Profile extends ConsumerWidget {
               Container(
                 padding: EdgeInsets.all(8),
                 child: Row(
-                  spacing: 8,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: isSelf
-                          ? () async {
-                              final ImagePicker picker = ImagePicker();
-                              final image = await picker.pickImage(
-                                source: ImageSource.gallery,
-                              );
-                              if (image == null) return;
-
-                              final imageUrl = await toImageDataUrl(image);
-                              if (imageUrl == null) return;
-
-                              await updateUser(UpdateUserBody(image: imageUrl));
-                            }
-                          : null,
-                      child: ProfilePic(image: user.image, size: 128),
-                    ),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                      child: Row(
                         spacing: 8,
                         children: [
-                          Text(user.username, style: TextStyle(fontSize: 16)),
-                          if (!isSelf)
-                            FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: follow != null
-                                    ? Theme.of(context).colorScheme.secondary
-                                    : Theme.of(context).colorScheme.primary,
-                              ),
-                              onPressed: () {
-                                follow == null
-                                    ? followUser(userId)
-                                    : unfollowUser(userId);
-                              },
-                              child: Text(followButtonText),
+                          GestureDetector(
+                            onTap: isSelf
+                                ? () async {
+                                    final ImagePicker picker = ImagePicker();
+                                    final image = await picker.pickImage(
+                                      source: ImageSource.gallery,
+                                    );
+                                    if (image == null) return;
+
+                                    final imageUrl = await toImageDataUrl(
+                                      image,
+                                    );
+                                    if (imageUrl == null) return;
+
+                                    await updateUser(
+                                      UpdateUserBody(image: imageUrl),
+                                    );
+                                  }
+                                : null,
+                            child: ProfilePic(image: user.image, size: 80),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              spacing: 8,
+                              children: [
+                                Text(
+                                  user.username,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                if (!isSelf)
+                                  FilledButton(
+                                    style: FilledButton.styleFrom(
+                                      visualDensity: VisualDensity.compact,
+                                      backgroundColor: follow != null
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.secondary
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                    ),
+                                    onPressed: () {
+                                      follow == null
+                                          ? followUser(userId)
+                                          : unfollowUser(userId);
+                                    },
+                                    child: Text(followButtonText),
+                                  ),
+                              ],
                             ),
+                          ),
                         ],
                       ),
                     ),
+                    if (isSelf)
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: Text("Sign out"),
+                        onPressed: () {
+                          firebase.auth.signOut();
+                        },
+                      ),
                   ],
                 ),
               ),

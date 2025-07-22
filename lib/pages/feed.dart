@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/pages/intention.dart';
 import 'package:intentions_flutter/pages/profile.dart';
 import 'package:intentions_flutter/providers/auth_user.dart';
@@ -110,64 +109,45 @@ class Feed extends ConsumerWidget {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(feedProvider.future),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SignOutButton(),
-            Expanded(
-              child: feedState.when(
-                data: (val) {
-                  if (val.items.isEmpty) {
-                    return MaxHeightScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Nothing to show! Try:",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          SizedBox(height: 4),
-                          TextButton(
-                            onPressed: () {
-                              DefaultTabController.of(context).animateTo(1);
-                            },
-                            child: Text("following a user"),
-                          ),
-                          Text("or"),
-                          TextButton(
-                            onPressed: () {
-                              DefaultTabController.of(context).animateTo(2);
-                            },
-                            child: Text("creating an intention!"),
-                          ),
-                        ],
+        child: feedState.when(
+          data: (val) {
+            if (val.items.isEmpty) {
+              return MaxHeightScrollView(
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Nothing to show! Try:",
+                        style: TextStyle(fontSize: 16),
                       ),
-                    );
-                  }
+                      SizedBox(height: 4),
+                      TextButton(
+                        onPressed: () {
+                          DefaultTabController.of(context).animateTo(1);
+                        },
+                        child: Text("following a user"),
+                      ),
+                      Text("or"),
+                      TextButton(
+                        onPressed: () {
+                          DefaultTabController.of(context).animateTo(2);
+                        },
+                        child: Text("creating an intention!"),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
 
-                  return postsList;
-                },
-                error: (_, _) => Text('error fetching feed'),
-                loading: () => postsList,
-              ),
-            ),
-          ],
+            return postsList;
+          },
+          error: (_, _) => Text('error fetching feed'),
+          loading: () => postsList,
         ),
       ),
-    );
-  }
-}
-
-class SignOutButton extends StatelessWidget {
-  const SignOutButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      child: Text("Sign out"),
-      onPressed: () {
-        firebase.auth.signOut();
-      },
     );
   }
 }
