@@ -86,16 +86,25 @@ class Post extends ConsumerWidget {
             ],
           ),
         ),
-        imageUrl.when(
-          error: (_, _) => Text('error fetching image'),
-          loading: () => Container(),
-          data: (url) {
-            if (url != null) {
-              return Image(image: NetworkImage(url), fit: BoxFit.fill);
-            }
-            return Container();
-          },
-        ),
+        if (post.image != null)
+          imageUrl.when(
+            error: (_, _) => Text('error fetching image'),
+            loading: () => AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                height: 128,
+                alignment: Alignment.center,
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            data: (url) {
+              if (url != null) {
+                return Image(image: NetworkImage(url), fit: BoxFit.fill);
+              }
+              return Container();
+            },
+          ),
         Container(
           padding: EdgeInsets.all(8),
           child: Text(post.description ?? ''),
