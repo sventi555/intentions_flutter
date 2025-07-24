@@ -7,5 +7,6 @@ Tech debt:
 - use more of an MVC architecture
 
 Enhancements(?):
+- random intention every day that people can participate in together!
 - non-blocking image upload pipeline
 - option to clear image on post creation

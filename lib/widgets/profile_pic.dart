@@ -10,7 +10,7 @@ class ProfilePic extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final imageUrl = ref.watch(imageUrlProvider(image));
+    final imageUrl = ref.watch(imageUrlProvider(image)).value;
 
     return Container(
       padding: EdgeInsets.all(2),
@@ -25,9 +25,9 @@ class ProfilePic extends ConsumerWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           image: DecorationImage(
-            image: NetworkImage(
-              imageUrl.value ?? "https://placehold.co/${size.toInt()}/png",
-            ),
+            image: imageUrl != null
+                ? NetworkImage(imageUrl)
+                : AssetImage('assets/images/dp_placeholder.jpg'),
           ),
         ),
         width: size,
