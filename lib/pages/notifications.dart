@@ -152,12 +152,17 @@ class FollowNotificationTile extends ConsumerWidget {
       throw StateError('must be signed in to view notifications');
     }
 
-    final followRecipient = follow.toUser.id == authUser.uid;
-    if (!followRecipient && follow.status != FollowStatus.accepted) {
+    final isFollowRecipient = follow.toUser.id == authUser.uid;
+    final isFollowSender = !isFollowRecipient;
+    if (isFollowSender && follow.status != FollowStatus.accepted) {
       throw Exception(
         'should only get notifications as sender when request is accepted',
       );
     }
+
+    final otherUser = isFollowRecipient
+        ? follow.fromUser.username
+        : follow.toUser.username;
 
     return ListTile(
       title: RichText(
@@ -165,13 +170,13 @@ class FollowNotificationTile extends ConsumerWidget {
           style: DefaultTextStyle.of(context).style,
           children: [
             TextSpan(
-              text: follow.fromUser.username,
+              text: otherUser,
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
                   context.push('/user/${follow.fromUser.id}');
                 },
             ),
-            followRecipient
+            isFollowRecipient
                 ? TextSpan(
                     text: follow.status == FollowStatus.pending
                         ? ' requested to follow you'
