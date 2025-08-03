@@ -513,9 +513,11 @@ class MaybePrivateWrapper extends ConsumerWidget {
           if (allowedToView) {
             return child;
           }
-          return Container(
-            alignment: Alignment.center,
-            child: Text("This user is private"),
+          return MaxHeightScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Text("This user is private")],
+            ),
           );
         },
         error: (_, _) => Text("error loading auth user"),
