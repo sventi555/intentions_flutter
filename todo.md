@@ -1,3 +1,8 @@
+- toggle for public profile
+- loading animations:
+    - sign up
+    - notification response
+- crop profile pic better (or add option to do it manually)
 - android production deployment (play store)
 
 Tech debt:
