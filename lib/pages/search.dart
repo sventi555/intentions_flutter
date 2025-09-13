@@ -68,6 +68,12 @@ class _SearchState extends ConsumerState<Search> {
   final TextEditingController searchController = TextEditingController();
   String? searchedUsername;
 
+  setSearchedName() {
+    setState(() {
+      searchedUsername = searchController.text;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final searchedUsers = ref.watch(userSearchProvider(searchedUsername));
@@ -88,16 +94,17 @@ class _SearchState extends ConsumerState<Search> {
                       border: OutlineInputBorder(),
                       labelText: "Search username",
                     ),
+                    onTapOutside: (event) {
+                      setSearchedName();
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    },
+                    onEditingComplete: setSearchedName,
                   ),
                 ),
                 SizedBox(width: 8),
                 OutlinedButton(
+                  onPressed: setSearchedName,
                   child: Text("search"),
-                  onPressed: () {
-                    setState(() {
-                      searchedUsername = searchController.text;
-                    });
-                  },
                 ),
               ],
             ),

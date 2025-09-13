@@ -261,6 +261,9 @@ class _CreatePostState extends ConsumerState<CreatePost> {
                   labelText: "description",
                   alignLabelWithHint: true,
                 ),
+                onTapOutside: (event) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
               ),
               if (errMessage != null)
                 Text(

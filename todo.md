@@ -1,6 +1,8 @@
+- see who you're following and who's following you
 - loading animations:
     - sign up
     - notification response
+    - follow request
 - crop profile pic better (or add option to do it manually)
 - delete post UI
 - toggle for public profile
@@ -12,6 +14,8 @@ Tech debt:
 - use more of an MVC architecture
 
 Enhancements(?):
+- clear notifications
 - random intention every day that people can participate in together!
 - non-blocking image upload pipeline
 - option to clear image on post creation
+- image for each intention. gallery view of intentions (grid)
