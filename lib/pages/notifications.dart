@@ -13,6 +13,7 @@ import 'package:intentions_flutter/providers/follows.dart';
 import 'package:intentions_flutter/providers/notifications.dart';
 import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 final notificationsRouterProvider = Provider((ref) {
   final user = ref.watch(authUserProvider).value;
@@ -196,20 +197,30 @@ class FollowNotificationTile extends ConsumerWidget {
               children: [
                 IconButton(
                   icon: Icon(Icons.check),
-                  onPressed: () {
-                    respondToFollow(
+                  onPressed: () async {
+                    context.loaderOverlay.show();
+
+                    await respondToFollow(
                       otherUser.id,
                       RespondToFollowBody(action: RespondAction.accept),
                     );
+
+                    if (!context.mounted) return;
+                    context.loaderOverlay.hide();
                   },
                 ),
                 IconButton(
                   icon: Icon(Icons.close),
-                  onPressed: () {
-                    respondToFollow(
+                  onPressed: () async {
+                    context.loaderOverlay.show();
+
+                    await respondToFollow(
                       otherUser.id,
                       RespondToFollowBody(action: RespondAction.decline),
                     );
+
+                    if (!context.mounted) return;
+                    context.loaderOverlay.hide();
                   },
                 ),
               ],

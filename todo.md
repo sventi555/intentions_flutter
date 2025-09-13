@@ -1,8 +1,4 @@
 - see who you're following and who's following you
-- loading animations:
-    - sign up
-    - notification response
-    - follow request
 - crop profile pic better (or add option to do it manually)
 - delete post UI
 - toggle for public profile (or just get rid of public... Would simplify backend. I think that is good)

@@ -16,6 +16,7 @@ import 'package:intentions_flutter/utils/image.dart';
 import 'package:intentions_flutter/widgets/expanded_scroll_view.dart';
 import 'package:intentions_flutter/widgets/posts_list.dart';
 import 'package:intentions_flutter/widgets/profile_pic.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 final profileRouterProvider = Provider((ref) {
@@ -216,10 +217,15 @@ class Profile extends ConsumerWidget {
                                               context,
                                             ).colorScheme.primary,
                                     ),
-                                    onPressed: () {
-                                      follow == null
+                                    onPressed: () async {
+                                      context.loaderOverlay.show();
+
+                                      await (follow == null
                                           ? followUser(userId)
-                                          : unfollowUser(userId);
+                                          : unfollowUser(userId));
+
+                                      if (!context.mounted) return;
+                                      context.loaderOverlay.show();
                                     },
                                     child: Text(followButtonText),
                                   ),
