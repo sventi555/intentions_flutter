@@ -5,7 +5,7 @@
     - follow request
 - crop profile pic better (or add option to do it manually)
 - delete post UI
-- toggle for public profile
+- toggle for public profile (or just get rid of public... Would simplify backend. I think that is good)
 
 Tech debt:
 - handle failed api calls on write operations more gracefully in all cases

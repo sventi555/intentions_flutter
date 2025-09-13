@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:intentions_flutter/api_config.dart';
 import 'package:intentions_flutter/firebase.dart';
 import 'package:intentions_flutter/widgets/password_input.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -36,11 +37,13 @@ class _SignUpState extends State<SignUp> {
     });
   }
 
-  void onSubmit() async {
+  void onSubmit(BuildContext context) async {
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
       return;
     }
+
+    context.loaderOverlay.show();
 
     final email = emailController.text;
     final password = passwordController.text;
@@ -76,6 +79,12 @@ class _SignUpState extends State<SignUp> {
 
         return;
       }
+
+      // I think too risky to hide AFTER signing in, because the context
+      // may not be mounted anymore and the loader will be stuck.
+      // So we hide it before signing in...
+      if (!context.mounted) return;
+      context.loaderOverlay.hide();
 
       await firebase.auth.signInWithEmailAndPassword(
         email: email,
@@ -156,7 +165,7 @@ class _SignUpState extends State<SignUp> {
                   // need to wait for forcedErrorText to clear
                   // otherwise validate will report "false"
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    onSubmit();
+                    onSubmit(context);
                   });
                 },
                 child: Text("Sign up"),
