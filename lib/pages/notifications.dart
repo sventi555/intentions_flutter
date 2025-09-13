@@ -160,9 +160,7 @@ class FollowNotificationTile extends ConsumerWidget {
       );
     }
 
-    final otherUser = isFollowRecipient
-        ? follow.fromUser.username
-        : follow.toUser.username;
+    final otherUser = isFollowRecipient ? follow.fromUser : follow.toUser;
 
     return ListTile(
       title: RichText(
@@ -170,10 +168,10 @@ class FollowNotificationTile extends ConsumerWidget {
           style: DefaultTextStyle.of(context).style,
           children: [
             TextSpan(
-              text: otherUser,
+              text: otherUser.username,
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
-                  context.push('/user/${follow.fromUser.id}');
+                  context.push('/user/${otherUser.id}');
                 },
             ),
             isFollowRecipient
@@ -188,9 +186,9 @@ class FollowNotificationTile extends ConsumerWidget {
       ),
       leading: GestureDetector(
         onTap: () {
-          context.push('/user/${follow.fromUser.id}');
+          context.push('/user/${otherUser.id}');
         },
-        child: ProfilePic(image: follow.fromUser.image),
+        child: ProfilePic(image: otherUser.image),
       ),
       trailing: follow.status == FollowStatus.pending
           ? Row(
@@ -200,7 +198,7 @@ class FollowNotificationTile extends ConsumerWidget {
                   icon: Icon(Icons.check),
                   onPressed: () {
                     respondToFollow(
-                      follow.fromUser.id,
+                      otherUser.id,
                       RespondToFollowBody(action: RespondAction.accept),
                     );
                   },
@@ -209,7 +207,7 @@ class FollowNotificationTile extends ConsumerWidget {
                   icon: Icon(Icons.close),
                   onPressed: () {
                     respondToFollow(
-                      follow.fromUser.id,
+                      otherUser.id,
                       RespondToFollowBody(action: RespondAction.decline),
                     );
                   },
