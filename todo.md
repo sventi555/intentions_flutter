@@ -1,8 +1,9 @@
-- toggle for public profile
 - loading animations:
     - sign up
     - notification response
 - crop profile pic better (or add option to do it manually)
+- delete post UI
+- toggle for public profile
 
 Tech debt:
 - handle failed api calls on write operations more gracefully in all cases
