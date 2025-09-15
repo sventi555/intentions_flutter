@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 
 Future<String?> toImageDataUrl(XFile image) async {
-  final rotatedImage = await FlutterExifRotation.rotateImage(path: image.path);
-
-  final imageBytes = await rotatedImage.readAsBytes();
+  final imageBytes = img.encodeJpg(
+    img.bakeOrientation(img.decodeImage(await image.readAsBytes())!),
+  );
   final base64Image = base64Encode(imageBytes);
 
   var mimeType = image.mimeType;

@@ -1,6 +1,5 @@
 - see who you're following and who's following you
-- crop profile pic better (or add option to do it manually)
-- delete post UI
+- delete/edit post UI
 - toggle for public profile (or just get rid of public... Would simplify backend. I think that is good)
 
 Tech debt:
@@ -15,3 +14,5 @@ Enhancements(?):
 - non-blocking image upload pipeline
 - option to clear image on post creation
 - image for each intention. gallery view of intentions (grid)
+- multiple intentions for one post
+- sign up/in can be top level. It doesn't need to keep the tab bar showing.

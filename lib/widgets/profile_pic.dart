@@ -25,6 +25,7 @@ class ProfilePic extends ConsumerWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           image: DecorationImage(
+            fit: BoxFit.cover,
             image: imageUrl != null
                 ? NetworkImage(imageUrl)
                 : AssetImage('assets/images/dp_placeholder.jpg'),
