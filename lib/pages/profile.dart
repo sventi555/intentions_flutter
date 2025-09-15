@@ -505,13 +505,11 @@ class MaybePrivateWrapper extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authUser = ref.watch(authUserProvider);
-    final profileUser = ref.watch(userProvider(userId));
     final follow = ref.watch(followFromMeProvider(userId));
     final isSelf = userId == authUser.value?.uid;
 
-    final isPrivate = profileUser.value?.isPrivate ?? true;
     final allowedToView =
-        isSelf || !(isPrivate) || follow.value?.status == FollowStatus.accepted;
+        isSelf || follow.value?.status == FollowStatus.accepted;
 
     return follow.when(
       data: (follow) => authUser.when(
@@ -522,7 +520,7 @@ class MaybePrivateWrapper extends ConsumerWidget {
           return MaxHeightScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [Text("This user is private")],
+              children: [Text("Follow to view profile")],
             ),
           );
         },

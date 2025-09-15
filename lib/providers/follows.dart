@@ -39,16 +39,10 @@ Future<void> followUser(Ref ref, String userId) async {
 
   final token = await user.getIdToken();
 
-  final res = await http.post(
+  await http.post(
     Uri.parse('${ApiConfig.baseUrl}/follows/$userId'),
     headers: {'Authorization': token ?? ''},
   );
-
-  // only need to update feed immediately if followed user is public
-  final resBody = jsonDecode(res.body);
-  if (resBody['status'] == 'accepted') {
-    ref.invalidate(feedProvider);
-  }
 
   ref.invalidate(followFromMeProvider(userId));
 }

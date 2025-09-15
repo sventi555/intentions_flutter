@@ -56,7 +56,6 @@ class _SignUpState extends State<SignUp> {
           'username': usernameController.text,
           'email': email,
           'password': password,
-          'isPrivate': true,
         }),
       );
 

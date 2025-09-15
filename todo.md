@@ -1,6 +1,5 @@
 - see who you're following and who's following you
 - delete/edit post UI
-- toggle for public profile (or just get rid of public... Would simplify backend. I think that is good)
 
 Tech debt:
 - handle failed api calls on write operations more gracefully in all cases
@@ -9,6 +8,7 @@ Tech debt:
 - use more of an MVC architecture
 
 Enhancements(?):
+- QR code to add user
 - clear notifications
 - random intention every day that people can participate in together!
 - non-blocking image upload pipeline
